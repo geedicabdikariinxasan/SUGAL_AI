@@ -11,6 +11,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
+        /* 🚀 2. PERFECT COMPACT MOBILE FIT */
         html, body {
             position: fixed;
             inset: 0;
@@ -20,16 +21,16 @@
             overflow: hidden;
             background: #02091f;
             color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* SIDEBAR */
+        /* SIDEBAR DRAWER */
         #sidebar {
-            position: fixed; left: 0; top: 0; width: 280px; height: 100%;
+            position: fixed; left: 0; top: 0; width: 260px; height: 100%;
             background: linear-gradient(180deg, #03133e 0%, #020a25 100%);
             border-right: 1px solid rgba(0, 200, 255, .25);
-            padding: 20px; z-index: 100;
+            padding: 16px; z-index: 100;
             display: flex; flex-direction: column;
             transform: translateX(-100%);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -39,31 +40,31 @@
 
         .menu-btn {
             width: 100%; border: none; outline: none; background: transparent;
-            color: #b8c9e8; padding: 12px 14px; border-radius: 12px;
-            display: flex; align-items: center; gap: 12px; cursor: pointer;
-            text-align: left; transition: .2s; font-size: 14px; font-weight: 600;
+            color: #b8c9e8; padding: 10px 12px; border-radius: 10px;
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            text-align: left; transition: .2s; font-size: 13px; font-weight: 600;
         }
         .menu-btn:hover { background: rgba(20, 120, 255, .15); color: white; }
         .menu-btn.active {
             color: white; background: linear-gradient(100deg, #087cff, #673bff);
-            box-shadow: 0 0 20px rgba(20, 121, 255, .25);
+            box-shadow: 0 0 15px rgba(20, 121, 255, .25);
         }
 
         /* SCROLLBAR */
-        #scrollContainer::-webkit-scrollbar { width: 5px; }
+        #scrollContainer::-webkit-scrollbar { width: 4px; }
         #scrollContainer::-webkit-scrollbar-thumb { background: rgba(0, 217, 255, 0.25); border-radius: 10px; }
 
-        /* 🔤 FARTA OO AAD U WEYN OO BOLD AH (17px Bold) */
+        /* 🔤 1. FARTA OO AAD U WEYN OO CAD (15.5px Mobile, 17px Desktop) */
         .message-text {
-            font-size: 16.5px;
-            line-height: 1.7;
+            font-size: 15.5px;
+            line-height: 1.65;
             font-weight: 550;
             letter-spacing: 0.01em;
             word-break: break-word;
             white-space: pre-wrap;
         }
         @media (min-width: 640px) {
-            .message-text { font-size: 17.5px; }
+            .message-text { font-size: 17px; }
         }
 
         .user-msg {
@@ -91,14 +92,14 @@
             min-height: 0;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 16px;
+            padding: 12px 14px;
             position: relative;
             scroll-behavior: smooth;
         }
 
         .bottom-input-bar {
             flex-shrink: 0;
-            padding: 8px 14px 12px 14px;
+            padding: 6px 12px 10px 12px;
             background: #02091f;
             border-top: 1px solid rgba(100, 180, 255, .15);
             z-index: 30;
@@ -121,18 +122,18 @@
 
     <!-- SIDEBAR -->
     <aside id="sidebar">
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-white to-cyan-200 flex items-center justify-center text-2xl shadow-lg">🤖</div>
+        <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-white to-cyan-200 flex items-center justify-center text-xl shadow-lg">🤖</div>
                 <div>
-                    <h1 class="font-extrabold text-lg leading-none">SUGAL <span class="text-cyan-400">AI</span></h1>
-                    <p class="text-[10px] text-blue-200 mt-1">Your Smart Assistant</p>
+                    <h1 class="font-extrabold text-base leading-none">SUGAL <span class="text-cyan-400">AI</span></h1>
+                    <p class="text-[9px] text-blue-200 mt-0.5">Your Smart Assistant</p>
                 </div>
             </div>
-            <button onclick="toggleSidebar()" class="w-8 h-8 rounded-lg bg-blue-900/40 border border-cyan-400/30 text-cyan-400 flex items-center justify-center font-bold">✕</button>
+            <button onclick="toggleSidebar()" class="w-7 h-7 rounded-lg bg-blue-900/40 border border-cyan-400/30 text-cyan-400 flex items-center justify-center text-xs font-bold">✕</button>
         </div>
 
-        <div class="flex flex-col gap-1.5 flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-1 flex-1 overflow-y-auto">
             <button class="menu-btn active" onclick="goHome(); toggleSidebar();"><span>⌂</span> Home</button>
             <button class="menu-btn" onclick="newChat(); toggleSidebar();"><span>💬</span> New Chat</button>
             <button class="menu-btn" onclick="showHistory(); toggleSidebar();"><span>◷</span> Chat History</button>
@@ -140,26 +141,26 @@
             <button class="menu-btn" onclick="openImagePrompt(); toggleSidebar();"><span>🎨</span> Generate AI Image</button>
         </div>
 
-        <div class="pt-4 border-t border-blue-900/50 mt-auto">
-            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-blue-950/40 border border-blue-500/10 mb-2">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-sm" id="sidebarAvatar">H</div>
+        <div class="pt-3 border-t border-blue-900/50 mt-auto">
+            <div class="flex items-center gap-2.5 p-2 rounded-xl bg-blue-950/40 border border-blue-500/10 mb-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-xs" id="sidebarAvatar">H</div>
                 <div class="min-w-0">
                     <p class="text-xs font-bold truncate text-slate-200" id="sidebarUserName">Hassan Abdikariin</p>
-                    <p class="text-[9px] text-emerald-400 font-semibold">● Online</p>
+                    <p class="text-[8px] text-emerald-400 font-semibold">● Online</p>
                 </div>
             </div>
-            <button onclick="logout()" class="w-full text-left py-2 px-3 text-xs text-red-300 hover:bg-red-500/10 rounded-lg font-semibold">↪ &nbsp; Logout</button>
+            <button onclick="logout()" class="w-full text-left py-1.5 px-2.5 text-xs text-red-300 hover:bg-red-500/10 rounded-lg font-semibold">↪ &nbsp; Logout</button>
         </div>
     </aside>
 
     <!-- APP LAYOUT -->
     <div class="app-layout">
 
-        <!-- 1. TOP HEADER -->
-        <header class="h-14 min-h-[56px] bg-[#03133e]/95 border-b border-cyan-500/20 px-4 flex items-center gap-3 shrink-0 z-30 backdrop-blur-md">
-            <button id="menuToggleBtn" onclick="toggleSidebar()" class="w-9 h-9 rounded-lg border border-cyan-400/40 bg-cyan-400/10 text-cyan-300 flex items-center justify-center text-lg active:scale-95">☰</button>
+        <!-- 1. TOP HEADER (COMPACT) -->
+        <header class="h-12 min-h-[48px] sm:h-14 bg-[#03133e]/95 border-b border-cyan-500/20 px-3 sm:px-4 flex items-center gap-2.5 shrink-0 z-30 backdrop-blur-md">
+            <button id="menuToggleBtn" onclick="toggleSidebar()" class="w-8 h-8 rounded-lg border border-cyan-400/40 bg-cyan-400/10 text-cyan-300 flex items-center justify-center text-base active:scale-95">☰</button>
             
-            <div class="flex-1 max-w-xl h-9 bg-[#061945] border border-cyan-500/30 rounded-full px-3.5 flex items-center gap-2">
+            <div class="flex-1 max-w-lg h-8 sm:h-9 bg-[#061945] border border-cyan-500/30 rounded-full px-3 flex items-center gap-2">
                 <span class="text-cyan-400 text-xs">⌕</span>
                 <input id="topSearch" type="text" placeholder="Ask anything... or type 'sawir: ...'" class="w-full bg-transparent text-xs sm:text-sm text-white outline-none font-medium" onkeydown="handleTopSearch(event)">
             </div>
@@ -169,90 +170,90 @@
 
         <!-- 2. SCROLLABLE MIDDLE CONTAINER -->
         <div id="scrollContainer">
-            <div class="glow absolute w-72 h-72 rounded-full bg-blue-600/10 blur-3xl right-5 top-10 pointer-events-none"></div>
-            <div class="glow absolute w-64 h-64 rounded-full bg-purple-600/10 blur-3xl left-5 bottom-10 pointer-events-none"></div>
+            <div class="glow absolute w-60 h-60 rounded-full bg-blue-600/10 blur-3xl right-5 top-10 pointer-events-none"></div>
+            <div class="glow absolute w-52 h-52 rounded-full bg-purple-600/10 blur-3xl left-5 bottom-10 pointer-events-none"></div>
 
             <!-- WELCOME SCREEN -->
-            <div id="welcomeBox" class="flex flex-col items-center justify-center text-center py-6 max-w-2xl mx-auto w-full my-auto">
-                <span class="px-3.5 py-1 rounded-full text-xs font-extrabold text-cyan-300 bg-cyan-400/10 border border-cyan-400/30">SUGAL AI</span>
-                <h1 class="text-3xl sm:text-4xl font-black mt-2.5">Hello, <span id="welcomeName" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400">Hassan Abdikariin</span> 👋</h1>
-                <p class="text-sm sm:text-base text-slate-300 mt-1.5 max-w-lg font-medium">Your AI assistant is ready! Ask questions, analyze documents & images, and create AI images.</p>
+            <div id="welcomeBox" class="flex flex-col items-center justify-center text-center py-4 max-w-xl mx-auto w-full my-auto">
+                <span class="px-3 py-0.5 rounded-full text-[10px] font-extrabold text-cyan-300 bg-cyan-400/10 border border-cyan-400/30">SUGAL AI</span>
+                <h1 class="text-2xl sm:text-3xl font-black mt-2">Hello, <span id="welcomeName" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400">Hassan Abdikariin</span> 👋</h1>
+                <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-md font-medium">Your AI assistant is ready! Create documents (Word/PDF), images, code, and more.</p>
 
                 <!-- ROBOT -->
-                <div class="w-24 h-20 sm:w-28 sm:h-24 my-4 rounded-[40%] bg-gradient-to-br from-white to-cyan-200 border-2 border-cyan-300 flex items-center justify-center text-4xl sm:text-5xl shadow-[0_0_30px_rgba(0,217,255,0.35)]">🤖</div>
+                <div class="w-20 h-16 sm:w-24 sm:h-20 my-3 rounded-[35%] bg-gradient-to-br from-white to-cyan-200 border-2 border-cyan-300 flex items-center justify-center text-3xl sm:text-4xl shadow-[0_0_25px_rgba(0,217,255,0.35)]">🤖</div>
 
                 <!-- QUICK ACTIONS -->
-                <div class="flex flex-wrap justify-center gap-2 mt-1">
-                    <button onclick="quickMessage('Magaalooyinka ugu waaweyn Soomaaliya ma ii sheegi kartaa?')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40 font-semibold">💡 Su'aalo Weydii</button>
-                    <button onclick="quickMessage('sawir: a majestic futuristic Somali warrior in glowing cyber armor 8k')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-900/40 text-cyan-200 hover:bg-cyan-800/50 font-semibold">🎨 Samee Sawir AI</button>
-                    <button onclick="quickMessage('Koodh Python ah oo calculator ah ii samee')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40 font-semibold">💻 Koodh Samee</button>
+                <div class="flex flex-wrap justify-center gap-1.5 mt-1">
+                    <button onclick="quickMessage('Magaalooyinka ugu waaweyn Soomaaliya ma ii sheegi kartaa?')" class="text-xs px-3 py-1 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40 font-semibold">💡 Su'aalo Weydii</button>
+                    <button onclick="quickMessage('sawir: a futuristic Somali city with flying cars in 2050 cinematic 8k')" class="text-xs px-3 py-1 rounded-full border border-cyan-400/30 bg-cyan-900/40 text-cyan-200 hover:bg-cyan-800/50 font-semibold">🎨 Samee Sawir AI</button>
+                    <button onclick="quickMessage('Iigu qor warbixin mufasal ah oo ku saabsan Technology-ga (Word Document)')" class="text-xs px-3 py-1 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40 font-semibold">📄 Samee File Word</button>
                 </div>
             </div>
 
             <!-- CHAT MESSAGES LIST -->
-            <div id="messagesList" class="w-full max-w-4xl mx-auto space-y-4 pb-4"></div>
+            <div id="messagesList" class="w-full max-w-3xl mx-auto space-y-3 pb-3"></div>
         </div>
 
         <!-- ATTACHED FILE / IMAGE PREVIEW BADGE -->
-        <div id="filePreviewBadge" class="hidden px-4 py-1.5 bg-[#02091f] shrink-0">
-            <div class="flex items-center gap-2 bg-blue-900/80 border border-cyan-400/40 text-cyan-300 px-3.5 py-1 rounded-xl w-fit text-xs font-semibold mx-auto">
+        <div id="filePreviewBadge" class="hidden px-3 py-1 bg-[#02091f] shrink-0">
+            <div class="flex items-center gap-2 bg-blue-900/80 border border-cyan-400/40 text-cyan-300 px-3 py-1 rounded-xl w-fit text-xs font-semibold mx-auto">
                 <span id="attachedFileIcon">📄</span>
-                <span id="attachedFileName" class="truncate max-w-[220px]">file.pdf</span>
+                <span id="attachedFileName" class="truncate max-w-[200px]">file.pdf</span>
                 <button onclick="removeAttachedFile()" class="text-red-400 hover:text-red-300 ml-1 font-bold">✕</button>
             </div>
         </div>
 
-        <!-- 3. BOTTOM INPUT FORM -->
+        <!-- 3. BOTTOM INPUT FORM (COMPACT & CLEAN) -->
         <div class="bottom-input-bar relative">
 
             <!-- 📌 POPUP MENU EE 3-DA ASTAAMOOD -->
-            <div id="toolsMenuPopup" class="tools-popup hidden absolute bottom-16 left-4 sm:left-10 bg-[#06183d] border border-cyan-400/50 rounded-2xl p-2 shadow-2xl z-50 flex flex-col gap-1.5 min-w-[180px] backdrop-blur-xl">
-                <button type="button" onclick="document.getElementById('fileInput').click(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
-                    <span class="text-base text-cyan-400">📎</span> Attach File & Image
+            <div id="toolsMenuPopup" class="tools-popup hidden absolute bottom-14 left-3 sm:left-8 bg-[#06183d] border border-cyan-400/50 rounded-2xl p-2 shadow-2xl z-50 flex flex-col gap-1 min-w-[170px] backdrop-blur-xl">
+                <button type="button" onclick="document.getElementById('fileInput').click(); closeToolsMenu();" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
+                    <span class="text-sm text-cyan-400">📎</span> Attach File & Image
                 </button>
-                <button type="button" onclick="document.getElementById('pdfInput').click(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
-                    <span class="text-base text-cyan-400">📄</span> Upload PDF Doc
+                <button type="button" onclick="document.getElementById('pdfInput').click(); closeToolsMenu();" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
+                    <span class="text-sm text-cyan-400">📄</span> Upload PDF Doc
                 </button>
-                <button type="button" onclick="openImagePrompt(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
-                    <span class="text-base text-purple-400">🎨</span> Generate AI Image
+                <button type="button" onclick="openImagePrompt(); closeToolsMenu();" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
+                    <span class="text-sm text-purple-400">🎨</span> Generate AI Image
                 </button>
             </div>
 
-            <form id="chatForm" onsubmit="sendMessage(event)" class="max-w-4xl mx-auto flex items-center gap-2 bg-[#06183d] border border-cyan-400/70 rounded-full px-3 sm:px-4 py-2 shadow-[0_0_20px_rgba(0,217,255,0.15)] focus-within:border-cyan-300">
+            <form id="chatForm" onsubmit="sendMessage(event)" class="max-w-3xl mx-auto flex items-center gap-1.5 bg-[#06183d] border border-cyan-400/70 rounded-full px-2.5 sm:px-3.5 py-1.5 shadow-[0_0_20px_rgba(0,217,255,0.15)] focus-within:border-cyan-300">
                 
                 <!-- ➕ BATOONKA 3-DA ASTAAMOOD -->
-                <button type="button" onclick="toggleToolsMenu()" title="Attach & AI Tools" class="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-sm hover:bg-cyan-400/20 active:scale-95 transition font-bold">
+                <button type="button" onclick="toggleToolsMenu()" title="Attach & AI Tools" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-xs hover:bg-cyan-400/20 active:scale-95 transition font-bold shrink-0">
                     ➕
                 </button>
 
                 <!-- INPUT FIELD -->
-                <input id="messageInput" type="text" placeholder="Type a message or 'sawir: ...'" autocomplete="off" class="flex-1 bg-transparent text-white text-sm sm:text-base outline-none px-1 py-1 font-semibold">
+                <input id="messageInput" type="text" placeholder="Type a message or 'sawir: ...'" autocomplete="off" class="flex-1 bg-transparent text-white text-xs sm:text-sm outline-none px-1 py-1 font-semibold">
 
                 <!-- 🎙️ VOICE INPUT -->
-                <button type="button" onclick="startVoice()" title="Voice Input" class="p-1.5 text-cyan-400 hover:text-white hover:bg-blue-900/40 rounded-full transition text-base">
+                <button type="button" onclick="startVoice()" title="Voice Input" class="p-1 text-cyan-400 hover:text-white hover:bg-blue-900/40 rounded-full transition text-sm shrink-0">
                     🎙️
                 </button>
 
                 <!-- SEND BUTTON -->
-                <button type="submit" id="sendBtn" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white shrink-0 active:scale-95 shadow-md text-sm sm:text-base font-bold">➤</button>
+                <button type="submit" id="sendBtn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white shrink-0 active:scale-95 shadow-md text-xs sm:text-sm font-bold">➤</button>
             </form>
-            <p class="text-center text-[10px] text-slate-500 mt-1.5 font-medium">Powered by SUGAL AI • Smarter • Faster</p>
+            <p class="text-center text-[9px] text-slate-500 mt-1 font-medium">Powered by SUGAL AI • Smarter • Faster</p>
         </div>
 
     </div>
 
-    <!-- HIDDEN FILE & IMAGE INPUTS -->
+    <!-- HIDDEN FILE INPUTS -->
     <input type="file" id="fileInput" class="hidden" accept="image/*,.pdf,.txt,.docx,.doc,.csv" onchange="handleFiles(this.files)">
     <input type="file" id="pdfInput" class="hidden" accept=".pdf" onchange="handleFiles(this.files)">
 
     <!-- HISTORY MODAL -->
     <div id="historyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#06183d] border border-cyan-500/30 rounded-2xl max-w-sm w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
-            <div class="p-4 border-b border-cyan-500/20 flex items-center justify-between">
+            <div class="p-3.5 border-b border-cyan-500/20 flex items-center justify-between">
                 <h3 class="font-bold text-xs text-cyan-300">Chat History</h3>
-                <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
+                <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
             </div>
-            <div class="p-4 overflow-y-auto flex-1 space-y-2" id="modalHistoryList"></div>
+            <div class="p-3 overflow-y-auto flex-1 space-y-2" id="modalHistoryList"></div>
             <div class="p-3 border-t border-cyan-500/20 bg-[#020a25] flex justify-between items-center">
                 <button onclick="clearAllHistory()" class="text-red-400 text-xs font-semibold hover:underline">Clear All</button>
                 <button onclick="newChat(); closeModal('historyModal');" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold">+ New Chat</button>

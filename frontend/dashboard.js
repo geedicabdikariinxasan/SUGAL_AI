@@ -30,8 +30,8 @@ function renderTopAuthNav() {
         const initial = userName.charAt(0).toUpperCase();
 
         topAuthArea.innerHTML = `
-            <div class="flex items-center gap-2 bg-[#06183d] px-2.5 py-1 rounded-2xl border border-cyan-500/20">
-                <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-xs text-white">${initial}</div>
+            <div class="flex items-center gap-1.5 bg-[#06183d] px-2 py-1 rounded-2xl border border-cyan-500/20">
+                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-[10px] sm:text-xs text-white">${initial}</div>
                 <p class="text-xs font-bold text-slate-200 hidden sm:block">${userName}</p>
             </div>
         `;
@@ -109,7 +109,7 @@ function openImagePrompt() {
     }
 }
 
-// ================= SEND MESSAGE & AI IMAGE GENERATOR =================
+// ================= SEND MESSAGE & AI ENGINE =================
 async function sendMessage(e) {
     if (e) e.preventDefault();
     closeToolsMenu();
@@ -136,19 +136,27 @@ async function sendMessage(e) {
 
     appendMessage('user', uiMessage);
     if (input) input.value = '';
-    removeAttachedFile();
 
-    // 🎨 CHECK IF USER ASKS FOR AN AI IMAGE
+    // 🎨 1. CHECK IF USER WANTS AN IMAGE GENERATION OR IMAGE EDIT
     const lowerPrompt = userPrompt.toLowerCase();
-    if (lowerPrompt.startsWith("sawir:") || lowerPrompt.startsWith("image:") || lowerPrompt.startsWith("/image") || lowerPrompt.startsWith("sawir ")) {
-        const imageSubject = userPrompt.replace(/^(sawir:|image:|\/image|sawir)/i, "").trim();
-        if (imageSubject) {
-            await handleImageGeneration(imageSubject);
-            return;
+    const isImageGeneration = /^(sawir:|image:|\/image|sawir ii samee|sawirka|sawir )/i.test(userPrompt);
+    const isImageEdit = attachedFile && attachedFile.isImage && /(edit|beddel|hagaaji|wax ka beddel)/i.test(userPrompt);
+
+    if (isImageGeneration || isImageEdit) {
+        let imageSubject = userPrompt.replace(/^(sawir:|image:|\/image|sawir ii samee|sawirka|sawir)/i, "").trim();
+        if (isImageEdit) {
+            imageSubject = `Modify this image: ${attachedFile.name}, change according to: ${userPrompt}`;
         }
+        removeAttachedFile();
+        await handleImageGeneration(imageSubject || "A beautiful Somali landscape with modern architecture 8k");
+        return;
     }
 
+    removeAttachedFile();
     const typingId = appendTyping();
+
+    // 📄 2. CHECK IF USER REQUESTED A FILE CREATION (Word/PDF)
+    const isFileRequest = /(file|word|pdf|\.doc|\.docx|warbixin|document|qoraal file ah)/i.test(userPrompt);
 
     try {
         const response = await fetch('/api/chat', {
@@ -166,8 +174,7 @@ async function sendMessage(e) {
         if (response.ok) {
             const data = await response.json();
             currentChatId = data.chat_id;
-            // 🚀 MUUJI JAWAABTA NADIIFKA AH (Bilaa badhamo)
-            appendMessage('ai', data.reply || data.response || 'Haye!');
+            appendMessage('ai', data.reply || data.response || 'Haye!', isFileRequest);
         } else {
             appendMessage('ai', 'Cillad ayaa dhacday, fadlan dib u tijaabi.');
         }
@@ -177,7 +184,7 @@ async function sendMessage(e) {
     }
 }
 
-// 🎨 ROBUST BACKEND AI IMAGE GENERATOR (HANDLES SOMALI & ENGLISH PROMPTS)
+// 🎨 ROBUST AI IMAGE GENERATOR
 async function handleImageGeneration(promptText) {
     const user = getUserData();
     const typingId = appendTyping("🎨 SUGAL AI wuxuu samaynayaa sawirkaaga HD-ga ah...");
@@ -200,17 +207,16 @@ async function handleImageGeneration(promptText) {
             if (!list) return;
 
             const div = document.createElement('div');
-            div.className = 'ai-msg mr-auto p-4 sm:p-5 rounded-2xl max-w-[92%] sm:max-w-[80%] rounded-bl-xs space-y-3';
+            div.className = 'ai-msg mr-auto p-3.5 sm:p-4 rounded-2xl max-w-[95%] sm:max-w-[80%] rounded-bl-xs space-y-2.5';
             div.innerHTML = `
                 <div class="flex items-center justify-between">
                     <p class="text-xs sm:text-sm text-cyan-300 font-bold">🎨 Sawirkii aad codsatay: <em>"${escapeHtml(promptText)}"</em></p>
-                    <button onclick="speakText('${escapeHtml(promptText)}')" class="text-xs text-cyan-300 hover:text-white" title="Dhagayso">🔊</button>
                 </div>
                 <div class="overflow-hidden rounded-xl border border-cyan-400/40 shadow-xl bg-slate-950">
                     <img src="${data.image_url}" alt="${escapeHtml(promptText)}" class="w-full h-auto object-cover rounded-xl shadow-lg transition duration-300 hover:scale-[1.02]" loading="lazy">
                 </div>
-                <div class="flex justify-end pt-1">
-                    <a href="${data.image_url}" target="_blank" download="sugal_ai_image.jpg" class="text-xs font-bold text-cyan-300 hover:underline flex items-center gap-1.5 bg-blue-900/80 px-3.5 py-1.5 rounded-lg border border-cyan-500/40">
+                <div class="flex justify-end gap-2 pt-1">
+                    <a href="${data.image_url}" target="_blank" download="sugal_ai_image.jpg" class="text-xs font-bold text-cyan-300 hover:underline flex items-center gap-1 bg-blue-900/80 px-3 py-1.5 rounded-lg border border-cyan-500/40">
                         ⬇️ Soo Daji Sawirka (HD)
                     </a>
                 </div>
@@ -226,6 +232,41 @@ async function handleImageGeneration(promptText) {
     }
 }
 
+// 📄 FILE DOWNLOAD HELPERS (WORD & PDF)
+window.downloadTextAsWord = function(buttonEl) {
+    const parentMsg = buttonEl.closest('.ai-msg');
+    const content = parentMsg.querySelector('.msg-content-text').innerText;
+    const filename = "SUGAL_AI_Document.doc";
+
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>SUGAL AI Document</title></head><body style='font-family: Arial, sans-serif; font-size: 13pt; line-height: 1.6; color: #111;'>";
+    const footer = "</body></html>";
+    const sourceHTML = header + content.replace(/\n/g, "<br>") + footer;
+    const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+    
+    const fileDownload = document.createElement("a");
+    document.body.appendChild(fileDownload);
+    fileDownload.href = source;
+    fileDownload.download = filename;
+    fileDownload.click();
+    document.body.removeChild(fileDownload);
+};
+
+window.downloadTextAsPDF = function(buttonEl) {
+    const parentMsg = buttonEl.closest('.ai-msg');
+    const content = parentMsg.querySelector('.msg-content-text').innerHTML;
+    
+    const printWindow = window.open('', '', 'height=700,width=800');
+    printWindow.document.write('<html><head><title>SUGAL AI Document</title>');
+    printWindow.document.write('<style>body{font-family: Arial, sans-serif; padding: 40px; font-size: 13pt; line-height: 1.6; color: #222;} h2{color:#0284c7;} strong{color:#0369a1;}</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<h2>SUGAL AI Generated Document</h2><hr style="margin-bottom:20px;">');
+    printWindow.document.write(content.replace(/\n/g, "<br>"));
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 400);
+};
+
 // 🔤 MARKDOWN FORMATTER
 function formatMarkdown(text) {
     if (!text) return "";
@@ -235,7 +276,7 @@ function formatMarkdown(text) {
     return formatted;
 }
 
-// 🔊 TEXT TO SPEECH (DHAGAYSO CODKA)
+// 🔊 TEXT TO SPEECH
 window.speakText = function(text) {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
@@ -245,24 +286,48 @@ window.speakText = function(text) {
     window.speechSynthesis.speak(utterance);
 };
 
-// 🚀 APPEND CLEAN MESSAGE (ONLY BOLD TEXT + 🔊 SPEAK BUTTON)
-function appendMessage(role, text) {
+// 🚀 APPEND MESSAGE (WITH OPTIONAL DIRECT FILE DOWNLOAD CARD)
+function appendMessage(role, text, showFileCard = false) {
     const list = document.getElementById('messagesList');
     if (!list) return;
 
     const div = document.createElement('div');
-    div.className = `p-4 sm:p-5 rounded-2xl message-text max-w-[90%] sm:max-w-[82%] relative group ${
+    div.className = `p-3.5 sm:p-4 rounded-2xl message-text max-w-[92%] sm:max-w-[82%] relative ${
         role === 'user' ? 'user-msg ml-auto text-white rounded-br-xs' : 'ai-msg mr-auto text-slate-100 rounded-bl-xs'
     }`;
 
     if (role === 'ai') {
+        let fileCardHTML = '';
+        if (showFileCard) {
+            fileCardHTML = `
+                <div class="mt-3 p-3 rounded-xl bg-blue-950/80 border border-cyan-400/40 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">📄</span>
+                        <div>
+                            <p class="text-xs font-bold text-cyan-300">SUGAL_AI_Document</p>
+                            <p class="text-[10px] text-slate-400">File-kaagii waa diyaar, dooro nooca aad u rabto:</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="downloadTextAsWord(this)" class="px-2.5 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 rounded-lg text-xs font-bold text-cyan-300 flex items-center gap-1">
+                            📝 Soo Daji Word (.doc)
+                        </button>
+                        <button onclick="downloadTextAsPDF(this)" class="px-2.5 py-1 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50 rounded-lg text-xs font-bold text-purple-300 flex items-center gap-1">
+                            📕 Soo Daji PDF
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         div.innerHTML = `
             <div class="flex justify-between items-start gap-2">
-                <div class="flex-1">${formatMarkdown(text)}</div>
-                <button onclick="speakText('${escapeHtml(text.replace(/'/g, "\\'"))}')" class="text-xs text-cyan-400 hover:text-white opacity-70 hover:opacity-100 transition p-1" title="Dhagayso Codka">
+                <div class="flex-1 msg-content-text">${formatMarkdown(text)}</div>
+                <button onclick="speakText('${escapeHtml(text.replace(/'/g, "\\'"))}')" class="text-xs text-cyan-400 hover:text-white opacity-75 p-1" title="Dhagayso">
                     🔊
                 </button>
             </div>
+            ${fileCardHTML}
         `;
     } else {
         div.innerHTML = formatMarkdown(text);
@@ -279,7 +344,7 @@ function appendTyping(customText = "✦ SUGAL AI is thinking...") {
 
     const div = document.createElement('div');
     div.id = id;
-    div.className = 'ai-msg mr-auto p-4 rounded-2xl text-sm font-bold text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
+    div.className = 'ai-msg mr-auto p-3 sm:p-4 rounded-2xl text-xs sm:text-sm font-bold text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
     div.innerHTML = `<span>${customText}</span>`;
     list.appendChild(div);
 
@@ -333,7 +398,7 @@ async function handleFiles(files) {
             
             const input = document.getElementById('messageInput');
             if (input) {
-                input.placeholder = `Su'aasha aad ka qabto '${data.file_name}' halkan ku qor...`;
+                input.placeholder = isImg ? `Sawirkan maxaan kaaga beddelaa ama kaaga sharraxaa?...` : `Su'aasha aad ka qabto '${data.file_name}' halkan ku qor...`;
                 input.focus();
             }
         } else {
@@ -406,12 +471,12 @@ function showHistory() {
     } else {
         allUserChats.forEach(chat => {
             const item = `
-                <div class="flex items-center justify-between p-2.5 rounded-xl bg-blue-950/40 hover:bg-blue-900/60 cursor-pointer border border-cyan-500/10 transition" onclick="openChat('${chat.chat_id}')">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-blue-950/40 hover:bg-blue-900/60 cursor-pointer border border-cyan-500/10 transition" onclick="openChat('${chat.chat_id}')">
                     <div class="flex items-center gap-2 min-w-0">
                         <span>💬</span>
-                        <p class="text-xs font-bold text-slate-200 truncate max-w-[200px]">${chat.title}</p>
+                        <p class="text-xs font-bold text-slate-200 truncate max-w-[180px]">${chat.title}</p>
                     </div>
-                    <button onclick="deleteChat('${chat.chat_id}', event)" class="p-1 text-slate-400 hover:text-red-400 font-bold">✕</button>
+                    <button onclick="deleteChat('${chat.chat_id}', event)" class="p-1 text-slate-400 hover:text-red-400 font-bold text-xs">✕</button>
                 </div>
             `;
             list.insertAdjacentHTML('beforeend', item);
