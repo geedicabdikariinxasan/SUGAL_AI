@@ -5,7 +5,7 @@ from datetime import datetime
 from bson import ObjectId
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -17,7 +17,7 @@ try:
 except ImportError:
     pypdf = None
 
-app = FastAPI(title="SUGAL AI - 100% Robust Backend")
+app = FastAPI(title="SUGAL AI - Landing on Dashboard")
 
 # MongoDB Atlas
 MONGO_DETAILS = "mongodb+srv://Haji:1122@cluster0.wcn5swm.mongodb.net/?appName=Cluster0"
@@ -43,7 +43,6 @@ GROQ_FAST_MODELS = [
 ]
 
 def safe_object_id(id_val):
-    """Marnaba ma ogolaanayo in ObjectId qalad ahi burburiyo server-ka"""
     if not id_val:
         return None
     try:
@@ -78,7 +77,7 @@ class LoginSchema(BaseModel):
 
 class ChatMessageRequest(BaseModel):
     message: str
-    email: str = ""
+    email: str = "guest@user.com"
     chat_id: str | None = None
 
 class ProfileUpdateRequest(BaseModel):
@@ -148,7 +147,7 @@ async def update_user_profile(req: ProfileUpdateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ================= BULLETPROOF CHAT & MEMORY =================
+# ================= CHAT =================
 @app.post("/api/chat")
 async def send_chat_message(req: ChatMessageRequest):
     try:
@@ -160,14 +159,12 @@ async def send_chat_message(req: ChatMessageRequest):
         chat_doc = None
         valid_id = safe_object_id(req.chat_id)
 
-        # 1. Soo hel sheekada hore haddii ay jirto
         if valid_id:
             try:
                 chat_doc = await chat_collection.find_one({"_id": valid_id, "email": user_email})
             except Exception:
                 chat_doc = None
 
-        # 2. Haddii la waayo mid cusub abuur
         if not chat_doc:
             title = user_msg[:30] + ("..." if len(user_msg) > 30 else "")
             new_chat = {
@@ -182,7 +179,6 @@ async def send_chat_message(req: ChatMessageRequest):
             chat_doc = new_chat
             chat_doc["_id"] = valid_id
 
-        # 3. Context Memory (4-tii fariin ee ugu dambeeyay)
         history_messages = chat_doc.get("messages", [])
         context_window = history_messages[-4:]
 
@@ -190,10 +186,8 @@ async def send_chat_message(req: ChatMessageRequest):
         for msg in context_window:
             if isinstance(msg, dict) and "role" in msg and "content" in msg:
                 groq_messages.append({"role": msg["role"], "content": msg["content"]})
-        
         groq_messages.append({"role": "user", "content": user_msg})
 
-        # 4. Wac Groq adigoo isticmaalaya Multi-Model Failover
         ai_response = None
         last_error = ""
 
@@ -213,9 +207,8 @@ async def send_chat_message(req: ChatMessageRequest):
                 continue
 
         if not ai_response:
-            ai_response = f"Waan ka xumahay, cilad farsamo ayaa dhacday: {last_error}"
+            ai_response = f"Waan ka xumahay, cilad ayaa dhacday: {last_error}"
 
-        # 5. Ku kaydi MongoDB
         now = datetime.utcnow()
         new_user_msg = {"role": "user", "content": user_msg, "timestamp": now.isoformat()}
         new_ai_msg = {"role": "assistant", "content": ai_response, "timestamp": now.isoformat()}
@@ -239,7 +232,6 @@ async def send_chat_message(req: ChatMessageRequest):
     except HTTPException:
         raise
     except Exception as e:
-        print("CRITICAL CHAT ERROR:")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")
 
@@ -256,7 +248,7 @@ async def get_user_chat_history(email: str):
                 "updated_at": str(doc.get("updated_at", ""))
             })
         return {"status": "success", "chats": chats}
-    except Exception as e:
+    except Exception:
         return {"status": "success", "chats": []}
 
 @app.get("/api/chat/{chat_id}")
@@ -295,7 +287,7 @@ async def clear_all_user_chats(email: str):
     await chat_collection.delete_many({"email": email_clean})
     return {"status": "success", "message": "Dhammaan waa la tirtiray!"}
 
-# ================= FAST PDF & FILE EXTRACTOR =================
+# ================= FILE EXTRACTOR =================
 @app.post("/api/extract-file")
 async def extract_file_content(file: UploadFile = File(...)):
     try:
@@ -308,7 +300,7 @@ async def extract_file_content(file: UploadFile = File(...)):
                 reader = pypdf.PdfReader(io.BytesIO(content_bytes))
                 extracted_text = "\n".join([p.extract_text() or "" for p in reader.pages]).strip()
             else:
-                extracted_text = "Fadlan terminal-ka ku orod 'pip install pypdf' si PDF-yada loo akhriyo."
+                extracted_text = "PDF reader library is loading."
         else:
             try:
                 extracted_text = content_bytes.decode("utf-8", errors="ignore").strip()
@@ -326,17 +318,17 @@ async def extract_file_content(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ================= STATIC ROUTES =================
+# ================= 🚀 TOOS U FUR DASHBOARD-KA (ROOT ROUTE) =================
 @app.get("/")
 async def read_root():
-    return RedirectResponse(url="/login.html")
-
-@app.get("/login")
-async def read_login():
-    return FileResponse("frontend/login.html")
+    return FileResponse("frontend/dashboard.html")
 
 @app.get("/dashboard")
 async def read_dashboard():
     return FileResponse("frontend/dashboard.html")
+
+@app.get("/login")
+async def read_login():
+    return FileResponse("frontend/login.html")
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
