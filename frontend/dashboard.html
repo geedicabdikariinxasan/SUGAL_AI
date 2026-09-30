@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUGAL AI - Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f5f8ff; }
+        .sidebar { width: 280px; transition: all 0.3s ease; }
+        .main-area { margin-left: 280px; transition: all 0.3s ease; }
+        .sidebar-hidden { transform: translateX(-100%); }
+        .main-expanded { margin-left: 0; }
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .message-animation { animation: messageIn 0.25s ease; }
+        @keyframes messageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .robot { animation: floatRobot 3s ease-in-out infinite; }
+        @keyframes floatRobot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .typing-dot { animation: typing 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: .2s; }
+        .typing-dot:nth-child(3) { animation-delay: .4s; }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+        .dark-mode { background: #0f172a !important; color: white; }
+        .dark-card { background: #1e293b !important; color: white !important; border-color: #334155 !important; }
+        @media(max-width: 900px) {
+            .sidebar { position: fixed; z-index: 50; height: 100vh; }
+            .main-area { margin-left: 0; }
+            .right-panel { display: none; }
+        }
+        @media(max-width: 600px) {
+            .sidebar { width: 260px; }
+            .welcome-title { font-size: 28px; }
+            .feature-buttons { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+
+<body id="body">
+
+<!-- ========================================================= -->
+<!-- SIDEBAR -->
+<!-- ========================================================= -->
+<aside id="sidebar" class="sidebar fixed left-0 top-0 bottom-0 bg-[#06245a] text-white z-50 flex flex-col">
+    <!-- Logo -->
+    <div class="px-6 pt-7 pb-5">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center">
+                <div class="relative">
+                    <div class="w-8 h-6 rounded-lg bg-blue-600"></div>
+                    <div class="absolute -top-2 left-3 w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <div class="absolute top-2 left-2 w-1.5 h-1.5 bg-white rounded-full"></div>
+                    <div class="absolute top-2 right-2 w-1.5 h-1.5 bg-white rounded-full"></div>
+                </div>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold">SUGAL <span class="text-blue-400">AI</span></h1>
+                <p class="text-xs text-blue-200">Your Smart Assistant</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="px-4 space-y-2">
+        <button onclick="newChat()" class="w-full flex items-center gap-4 px-5 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 transition">
+            <i data-lucide="message-circle"></i>
+            <span class="font-medium">New Chat</span>
+        </button>
+
+        <button onclick="showHistory()" class="w-full flex items-center gap-4 px-5 py-3 rounded-xl hover:bg-blue-900 transition">
+            <i data-lucide="history"></i>
+            <span>Chat History</span>
+        </button>
+
+        <button onclick="document.getElementById('fileInput').click()" class="w-full flex items-center gap-4 px-5 py-3 rounded-xl hover:bg-blue-900 transition">
+            <i data-lucide="file-up"></i>
+            <span>Upload Files & PDFs</span>
+        </button>
+
+        <button onclick="showTools()" class="w-full flex items-center gap-4 px-5 py-3 rounded-xl hover:bg-blue-900 transition">
+            <i data-lucide="sparkles"></i>
+            <span>Explore AI Tools</span>
+        </button>
+
+        <button onclick="showSettings()" class="w-full flex items-center gap-4 px-5 py-3 rounded-xl hover:bg-blue-900 transition">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+        </button>
+    </div>
+
+    <div class="px-6 py-5">
+        <div class="border-t border-blue-800"></div>
+    </div>
+
+    <!-- Bottom Menu -->
+    <div class="px-4 space-y-2">
+        <button onclick="showProfile()" class="w-full flex items-center gap-4 px-5 py-3 rounded-xl hover:bg-blue-900 transition">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </button>
+
+        <button onclick="showHelp()" class="w-full flex items-center gap-4 px-5 py-3 rounded-xl hover:bg-blue-900 transition">
+            <i data-lucide="circle-help"></i>
+            <span>Help & Support</span>
+        </button>
+
+        <button onclick="logout()" class="w-full flex items-center gap-4 px-5 py-3 rounded-xl hover:bg-red-600 transition text-red-300 hover:text-white">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+        </button>
+    </div>
+
+    <!-- Upgrade Pro -->
+    <div class="mt-auto px-5 pb-4">
+        <div class="border border-blue-500 rounded-2xl p-5 bg-blue-950">
+            <div class="flex items-center gap-2">
+                <span class="text-yellow-400 text-xl">👑</span>
+                <h3 class="font-bold">Upgrade to Pro</h3>
+            </div>
+            <p class="text-xs text-blue-200 mt-2">Get access to more features and higher limits.</p>
+            <button onclick="showUpgradePro()" class="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 font-semibold text-white">
+                Upgrade Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="px-6 pb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <i data-lucide="sun"></i>
+            <span class="text-sm">Light Mode</span>
+        </div>
+        <button onclick="toggleTheme()" id="themeButton" class="w-12 h-6 rounded-full bg-blue-500 relative">
+            <span id="themeCircle" class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition"></span>
+        </button>
+    </div>
+</aside>
+
+<!-- ========================================================= -->
+<!-- MAIN AREA -->
+<!-- ========================================================= -->
+<main id="mainArea" class="main-area min-h-screen flex flex-col">
+
+<header class="h-20 bg-white border-b border-gray-200 flex items-center px-5 gap-5">
+    <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg">
+        <i data-lucide="menu"></i>
+    </button>
+
+    <div class="relative max-w-md w-full">
+        <i data-lucide="search" class="absolute left-4 top-3.5 text-gray-400 w-5"></i>
+        <input id="searchInput" type="text" placeholder="Search conversations..." class="w-full bg-[#f1f5ff] border-none rounded-full py-3 pl-12 pr-5 outline-none focus:ring-2 focus:ring-blue-300" oninput="filterHistory(this.value)">
+    </div>
+
+    <div class="ml-auto flex items-center gap-5">
+        <button class="relative p-2" onclick="showNotifications()">
+            <i data-lucide="bell"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+
+        <div class="h-8 border-l border-gray-200"></div>
+
+        <button onclick="showProfile()" class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold" id="topAvatar">U</div>
+            <div class="hidden sm:block text-left">
+                <p id="topUserName" class="font-bold text-sm text-gray-800">Loading...</p>
+                <p id="topUserEmail" class="text-xs text-gray-500">loading...</p>
+            </div>
+            <i data-lucide="chevron-down" class="text-gray-500"></i>
+        </button>
+    </div>
+</header>
+
+<div class="flex flex-1 gap-5 p-5 overflow-hidden">
+
+<!-- CHAT AREA -->
+<section class="flex-1 bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden">
+<div id="chatContainer" class="chat-scroll flex-1 overflow-y-auto p-6">
+    
+    <!-- Welcome Section (Banaan oo Nadiif ah bilowga) -->
+    <div id="welcomeSection" class="flex flex-col items-center justify-center min-h-full text-center">
+        <div class="robot mb-5">
+            <div class="w-28 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-[40%] flex items-center justify-center shadow-lg">
+                <div class="w-20 h-14 bg-[#061f57] rounded-2xl flex items-center justify-center gap-5">
+                    <div class="w-3 h-3 bg-cyan-300 rounded-full"></div>
+                    <div class="w-3 h-3 bg-cyan-300 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <h2 id="welcomeName" class="welcome-title text-4xl font-bold text-[#09265e]">Hello, User 👋</h2>
+        <p class="text-2xl font-semibold text-[#123e91] mt-3">How can I help you today?</p>
+        <p class="max-w-xl text-gray-500 mt-3">Ask me anything in any language (Somali, English, Arabic, Spanish, etc.), get instant answers, learn, create, and be more productive.</p>
+
+        <div class="feature-buttons flex flex-wrap justify-center gap-3 mt-8">
+            <button onclick="quickMessage('Magaalooyinka ugu waaweyn Soomaaliya ma ii sheegi kartaa?')" class="flex items-center gap-2 px-5 py-3 rounded-full border border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                <i data-lucide="lightbulb" class="w-4"></i> Answer Questions
+            </button>
+            <button onclick="quickMessage('Isku qor maqaal gaaban oo ku saabsan Artificial Intelligence.')" class="flex items-center gap-2 px-5 py-3 rounded-full border border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                <i data-lucide="pencil" class="w-4"></i> Write & Create
+            </button>
+            <button onclick="quickMessage('Koodhka Python ee lagaga shaqeeyo calculator ma ii samayn kartaa?')" class="flex items-center gap-2 px-5 py-3 rounded-full border border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                <i data-lucide="code" class="w-4"></i> Help with Code
+            </button>
+        </div>
+    </div>
+
+    <div id="messages" class="space-y-4"></div>
+</div>
+
+<!-- Attachment Buttons Bar -->
+<div class="px-5 pt-3">
+    <div class="border border-gray-200 rounded-xl p-3 flex items-center justify-between gap-4">
+        <button onclick="document.getElementById('fileInput').click()" class="flex items-center gap-3 text-blue-600 hover:text-blue-800">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <i data-lucide="paperclip"></i>
+            </div>
+            <div class="hidden sm:block text-left">
+                <p class="text-sm font-medium">Attach File</p>
+                <p class="text-xs text-gray-400">Images, PDF, Docs, etc.</p>
+            </div>
+        </button>
+
+        <div class="h-10 border-l border-gray-200"></div>
+
+        <button onclick="document.getElementById('pdfInput').click()" class="flex items-center gap-3 text-blue-600 hover:text-blue-800">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <i data-lucide="file-text"></i>
+            </div>
+            <div class="hidden sm:block text-left">
+                <p class="text-sm font-medium">Upload PDF</p>
+                <p class="text-xs text-gray-400">Get summary & insights</p>
+            </div>
+        </button>
+
+        <div class="h-10 border-l border-gray-200"></div>
+
+        <button onclick="startVoice()" class="flex items-center gap-3 text-blue-600 hover:text-blue-800">
+            <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center">
+                <i data-lucide="mic"></i>
+            </div>
+            <span class="hidden sm:block text-sm font-medium" id="voiceStatus">Voice Input</span>
+        </button>
+    </div>
+</div>
+
+<!-- Message Input Area (Oo leh File Attachment Preview Badge) -->
+<div class="p-5">
+
+    <!-- 📎 FAYLKA SOO DHEGAY (PREVIEW BADGE) -->
+    <div id="filePreviewContainer" class="hidden pb-2">
+        <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-800 px-3 py-1.5 rounded-xl w-fit text-xs font-semibold shadow-sm">
+            <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i>
+            <span id="attachedFileName" class="truncate max-w-[220px]">file.pdf</span>
+            <button type="button" onclick="removeAttachedFile()" class="text-gray-400 hover:text-red-500 ml-1 p-0.5 rounded transition">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-3 border border-gray-200 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-blue-200 bg-white">
+        <button onclick="document.getElementById('fileInput').click()" class="text-blue-600">
+            <i data-lucide="paperclip"></i>
+        </button>
+
+        <input id="messageInput" type="text" placeholder="Kuu qor fariintaada (Somali, English, Arabic, Spanish...)" class="flex-1 outline-none py-3 text-sm bg-transparent" onkeydown="handleEnter(event)">
+
+        <button onclick="sendMessage()" id="sendBtn" class="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition">
+            <i data-lucide="send"></i>
+        </button>
+    </div>
+    <p class="text-center text-xs text-gray-400 mt-2">AI-gu wuxuu kuugu jawaabayaa luuqad kasta oo aad ku qorto.</p>
+</div>
+</section>
+
+<!-- RIGHT PANEL -->
+<aside class="right-panel w-[330px] flex flex-col gap-4">
+<div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div class="bg-gradient-to-r from-blue-600 to-blue-400 p-5 text-white">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl" id="rightAvatar">U</div>
+            <div>
+                <h3 id="profileName" class="font-bold text-lg">Loading...</h3>
+                <p id="profileEmail" class="text-sm text-blue-100 truncate max-w-[150px]">loading...</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                    <span class="text-xs">Online</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 p-4">
+        <div class="text-center bg-blue-50 rounded-xl p-3">
+            <p id="chatCount" class="font-bold text-blue-700">0</p>
+            <p class="text-[11px] text-gray-500">Total Chats</p>
+        </div>
+        <div class="text-center bg-blue-50 rounded-xl p-3">
+            <p id="fileCount" class="font-bold text-blue-700">0</p>
+            <p class="text-[11px] text-gray-500">Files</p>
+        </div>
+        <div class="text-center bg-blue-50 rounded-xl p-3">
+            <p id="daysActive" class="font-bold text-blue-700">1</p>
+            <p class="text-[11px] text-gray-500">Days Active</p>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl border border-gray-200 p-4">
+    <h3 class="font-bold text-lg text-[#09265e] mb-4">Quick Actions</h3>
+    <div class="grid grid-cols-3 gap-3">
+        <button onclick="newChat()" class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition text-center">
+            <i data-lucide="plus" class="mx-auto text-blue-600"></i>
+            <span class="text-xs block mt-2">New Chat</span>
+        </button>
+        <button onclick="document.getElementById('fileInput').click()" class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition text-center">
+            <i data-lucide="upload" class="mx-auto text-blue-600"></i>
+            <span class="text-xs block mt-2">Upload</span>
+        </button>
+        <button onclick="startVoice()" class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition text-center">
+            <i data-lucide="mic" class="mx-auto text-blue-600"></i>
+            <span class="text-xs block mt-2">Voice</span>
+        </button>
+        <button onclick="showHistory()" class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition text-center">
+            <i data-lucide="history" class="mx-auto text-blue-600"></i>
+            <span class="text-xs block mt-2">History</span>
+        </button>
+        <button onclick="showSettings()" class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition text-center">
+            <i data-lucide="settings" class="mx-auto text-blue-600"></i>
+            <span class="text-xs block mt-2">Settings</span>
+        </button>
+        <button onclick="showHelp()" class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition text-center">
+            <i data-lucide="circle-help" class="mx-auto text-blue-600"></i>
+            <span class="text-xs block mt-2">Help</span>
+        </button>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl border border-gray-200 p-4 flex-1">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-lg text-[#09265e]">Recent Chats</h3>
+        <button onclick="showHistory()" class="text-blue-600 text-xs font-semibold hover:underline">View All</button>
+    </div>
+    <div id="recentChats" class="space-y-2 max-h-[220px] overflow-y-auto chat-scroll">
+        <p class="text-xs text-gray-400 text-center py-4">Wax sheekooyin ah weli ma jiraan</p>
+    </div>
+</div>
+
+<div class="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-2xl p-5 relative overflow-hidden">
+    <h3 class="font-bold text-blue-700 text-lg">Better Ideas</h3>
+    <h3 class="font-bold text-blue-700 text-lg">With AI ✨</h3>
+    <p class="text-xs text-gray-500 mt-2">Explore, learn, create and grow with your AI assistant.</p>
+    <div class="text-5xl absolute right-3 bottom-2">🤖</div>
+</div>
+</aside>
+</div>
+</main>
+
+<!-- MODALS -->
+<!-- 1. HISTORY MODAL -->
+<div id="historyModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="history" class="text-blue-600"></i>
+                <h3 class="font-bold text-lg text-[#09265e]">All Chat History</h3>
+            </div>
+            <button onclick="closeModal('historyModal')" class="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-700"><i data-lucide="x"></i></button>
+        </div>
+        <div class="p-4 overflow-y-auto flex-1 chat-scroll" id="modalHistoryList"></div>
+        <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+            <button onclick="clearAllHistory()" class="text-red-500 hover:text-red-700 text-xs font-semibold">Tirtir Dhammaan (Clear All)</button>
+            <button onclick="newChat(); closeModal('historyModal');" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700">+ New Chat</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. AI TOOLS MODAL -->
+<div id="toolsModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="sparkles" class="text-blue-600"></i>
+                <h3 class="font-bold text-lg text-[#09265e]">Explore AI Tools</h3>
+            </div>
+            <button onclick="closeModal('toolsModal')" class="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><i data-lucide="x"></i></button>
+        </div>
+        <div class="p-5 overflow-y-auto space-y-3">
+            <div onclick="useTool('Tarjumaad', 'Fadlan qoraalkan soo socda iigu tarjun af-Soomaali nadiif ah:\n\n')" class="p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600"><i data-lucide="languages"></i></div>
+                <div><h4 class="font-bold text-sm text-gray-800">Language Translator</h4><p class="text-xs text-gray-500">Tarjun qoraal kasta oo afafka qalaad ah.</p></div>
+            </div>
+            <div onclick="useTool('Code Helper', 'Ii qor koodh dhammaystiran oo ku saabsan:\n\n')" class="p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600"><i data-lucide="code"></i></div>
+                <div><h4 class="font-bold text-sm text-gray-800">Code Generator & Fixer</h4><p class="text-xs text-gray-500">Qor koodh cusub ama hagaaji cilladaha.</p></div>
+            </div>
+            <div onclick="useTool('Grammar Fixer', 'Fadlan sax naxwaha iyo higgaadda qoraalkan:\n\n')" class="p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-600"><i data-lucide="check-check"></i></div>
+                <div><h4 class="font-bold text-sm text-gray-800">Grammar & Spell Checker</h4><p class="text-xs text-gray-500">Hagaaji khaladaadka qoraalkaaga.</p></div>
+            </div>
+            <div onclick="useTool('Essay Writer', 'Isku qor maqaal / essay qoto dheer oo ku saabsan:\n\n')" class="p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600"><i data-lucide="file-text"></i></div>
+                <div><h4 class="font-bold text-sm text-gray-800">Essay & Article Writer</h4><p class="text-xs text-gray-500">Qor maqaallo, warbixino, iyo casharro.</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. PROFILE MODAL -->
+<div id="profileModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-bold text-lg text-[#09265e]">Profile Settings</h3>
+            <button onclick="closeModal('profileModal')" class="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><i data-lucide="x"></i></button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-full bg-blue-600 text-white font-bold text-2xl flex items-center justify-center" id="modalAvatar">U</div>
+                <div>
+                    <h4 class="font-bold text-gray-800 text-base" id="modalProfileName">User</h4>
+                    <p class="text-xs text-gray-400" id="modalProfileEmail">email@example.com</p>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Magacaaga (Full Name)</label>
+                <input type="text" id="editFullName" class="w-full p-3 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400">
+            </div>
+            <button onclick="saveProfileChanges()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 transition">Badbaadi Isbeddelka</button>
+        </div>
+    </div>
+</div>
+
+<!-- 4. SETTINGS MODAL -->
+<div id="settingsModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-bold text-lg text-[#09265e]">System Settings</h3>
+            <button onclick="closeModal('settingsModal')" class="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><i data-lucide="x"></i></button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <div>
+                    <h4 class="font-semibold text-sm text-gray-800">Theme (Mugdi / Iftiin)</h4>
+                    <p class="text-xs text-gray-500">U kala beddel Dark ama Light mode</p>
+                </div>
+                <button onclick="toggleTheme()" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold">Beddel</button>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
+                <div>
+                    <h4 class="font-semibold text-sm text-red-700">Clear All Chat History</h4>
+                    <p class="text-xs text-red-500">Tirtir dhammaan sheekooyinka aad samaysay</p>
+                </div>
+                <button onclick="clearAllHistory()" class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700">Tirtir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. HELP MODAL -->
+<div id="helpModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="circle-help" class="text-blue-600"></i>
+                <h3 class="font-bold text-lg text-[#09265e]">Help & Support</h3>
+            </div>
+            <button onclick="closeModal('helpModal')" class="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><i data-lucide="x"></i></button>
+        </div>
+        <div class="p-6 overflow-y-auto space-y-4 text-sm text-gray-600 chat-scroll">
+            <div class="p-4 bg-blue-50 rounded-xl">
+                <h4 class="font-bold text-blue-900 mb-1">Sidee buu SUGAL AI u shaqeeyaa?</h4>
+                <p class="text-xs text-blue-800 leading-relaxed">SUGAL AI wuxuu ku dhisan yahay sirdoonka macmalka ah ee casriga ah, wuxuuna kuugu jawaabi karaa af-Soomaali mufasal ah, Ingiriis, Carabi, iyo luqad kasta.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+                <h4 class="font-bold text-gray-900 mb-1">Ma iga lumayaan sheekooyinkaygu?</h4>
+                <p class="text-xs text-gray-600 leading-relaxed">Maya, dhammaan su'aalahaaga iyo jawaabahaaga waxay si ammaan ah ugu kaydsan yihiin MongoDB Atlas database.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. PRO MODAL -->
+<div id="proModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
+            <span class="text-4xl block mb-2">👑</span>
+            <h3 class="font-bold text-2xl">SUGAL AI Pro</h3>
+            <p class="text-xs text-blue-100 mt-1">Unlock the full power of Artificial Intelligence</p>
+        </div>
+        <div class="p-6 space-y-3">
+            <div class="flex items-center gap-3 text-sm text-gray-700"><i data-lucide="check" class="text-green-500 w-5"></i> Unlimited Chat Queries</div>
+            <div class="flex items-center gap-3 text-sm text-gray-700"><i data-lucide="check" class="text-green-500 w-5"></i> Advanced PDF & Image Analysis</div>
+            <div class="flex items-center gap-3 text-sm text-gray-700"><i data-lucide="check" class="text-green-500 w-5"></i> Ultra Fast Response Speed</div>
+            <button onclick="alert('Congratulations! Pro activated.'); closeModal('proModal');" class="w-full mt-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl text-sm hover:opacity-90 transition">
+                Activate Pro Plan ($9.99/mo)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- HIDDEN FILE INPUTS -->
+<input type="file" id="fileInput" class="hidden" accept=".txt,.pdf,.docx,.doc" onchange="handleFiles(this.files)">
+<input type="file" id="pdfInput" class="hidden" accept=".pdf,.txt" onchange="handleFiles(this.files)">
+
+<script src="dashboard.js"></script>
+<script>
+    if (window.lucide) { lucide.createIcons(); }
+</script>
+</body>
+</html>
