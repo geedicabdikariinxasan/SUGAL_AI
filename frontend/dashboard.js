@@ -22,6 +22,10 @@ function renderTopAuthNav() {
     const sidebarAvatar = document.getElementById('sidebarAvatar');
     const sidebarUserName = document.getElementById('sidebarUserName');
     const welcomeName = document.getElementById('welcomeName');
+    const modalAvatar = document.getElementById('modalAvatar');
+    const modalProfileName = document.getElementById('modalProfileName');
+    const modalProfileEmail = document.getElementById('modalProfileEmail');
+    const editFullName = document.getElementById('editFullName');
 
     if (!topAuthArea) return;
 
@@ -30,7 +34,7 @@ function renderTopAuthNav() {
         const initial = userName.charAt(0).toUpperCase();
 
         topAuthArea.innerHTML = `
-            <div class="flex items-center gap-1.5 bg-[#06183d] px-2 py-1 rounded-2xl border border-cyan-500/20">
+            <div onclick="showProfile()" class="flex items-center gap-1.5 bg-[#06183d] px-2 py-1 rounded-2xl border border-cyan-500/20 cursor-pointer hover:border-cyan-400 transition">
                 <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-[10px] sm:text-xs text-white">${initial}</div>
                 <p class="text-xs font-bold text-slate-200 hidden sm:block">${userName}</p>
             </div>
@@ -39,6 +43,10 @@ function renderTopAuthNav() {
         if (welcomeName) welcomeName.textContent = userName;
         if (sidebarAvatar) sidebarAvatar.textContent = initial;
         if (sidebarUserName) sidebarUserName.textContent = userName;
+        if (modalAvatar) modalAvatar.textContent = initial;
+        if (modalProfileName) modalProfileName.textContent = userName;
+        if (modalProfileEmail) modalProfileEmail.textContent = user.email;
+        if (editFullName) editFullName.value = userName;
     } else {
         topAuthArea.innerHTML = `
             <a href="login.html" class="px-2.5 py-1 border border-cyan-400/40 text-cyan-300 rounded-xl text-xs font-bold">Login</a>
@@ -48,6 +56,7 @@ function renderTopAuthNav() {
     }
 }
 
+// ================= SIDEBAR & TOOLS TOGGLES =================
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
@@ -109,6 +118,55 @@ function openImagePrompt() {
     }
 }
 
+// ================= 🚀 MODALS: TOOLS, PROFILE, HELP, SETTINGS =================
+function showTools() { openModal('toolsModal'); }
+function showProfile() { openModal('profileModal'); }
+function showHelp() { openModal('helpModal'); }
+function showSettings() { openModal('settingsModal'); }
+
+function openModal(id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.remove('hidden');
+}
+
+function closeModal(id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.add('hidden');
+}
+
+function useToolTemplate(templateText) {
+    closeModal('toolsModal');
+    const input = document.getElementById('messageInput');
+    if (input) {
+        input.value = templateText;
+        input.focus();
+    }
+}
+
+async function saveProfileChanges() {
+    const newName = document.getElementById('editFullName').value.trim();
+    const user = getUserData();
+    if (!newName || !user) return;
+
+    try {
+        const res = await fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.email, fullName: newName })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            user.fullName = newName;
+            localStorage.setItem('user', JSON.stringify(user));
+            renderTopAuthNav();
+            closeModal('profileModal');
+            alert('Magacaaga si guul leh ayaa loo beddelay!');
+        }
+    } catch (e) {
+        alert('Cillad ayaa dhacday!');
+    }
+}
+
 // ================= SEND MESSAGE & AI ENGINE =================
 async function sendMessage(e) {
     if (e) e.preventDefault();
@@ -137,8 +195,7 @@ async function sendMessage(e) {
     appendMessage('user', uiMessage);
     if (input) input.value = '';
 
-    // 🎨 1. CHECK IF USER WANTS AN IMAGE GENERATION OR IMAGE EDIT
-    const lowerPrompt = userPrompt.toLowerCase();
+    // 🎨 AI IMAGE GENERATION / EDIT CHECK
     const isImageGeneration = /^(sawir:|image:|\/image|sawir ii samee|sawirka|sawir )/i.test(userPrompt);
     const isImageEdit = attachedFile && attachedFile.isImage && /(edit|beddel|hagaaji|wax ka beddel)/i.test(userPrompt);
 
@@ -154,9 +211,6 @@ async function sendMessage(e) {
 
     removeAttachedFile();
     const typingId = appendTyping();
-
-    // 📄 2. CHECK IF USER REQUESTED A FILE CREATION (Word/PDF)
-    const isFileRequest = /(file|word|pdf|\.doc|\.docx|warbixin|document|qoraal file ah)/i.test(userPrompt);
 
     try {
         const response = await fetch('/api/chat', {
@@ -174,7 +228,7 @@ async function sendMessage(e) {
         if (response.ok) {
             const data = await response.json();
             currentChatId = data.chat_id;
-            appendMessage('ai', data.reply || data.response || 'Haye!', isFileRequest);
+            appendMessage('ai', data.reply || data.response || 'Haye!');
         } else {
             appendMessage('ai', 'Cillad ayaa dhacday, fadlan dib u tijaabi.');
         }
@@ -232,41 +286,6 @@ async function handleImageGeneration(promptText) {
     }
 }
 
-// 📄 FILE DOWNLOAD HELPERS (WORD & PDF)
-window.downloadTextAsWord = function(buttonEl) {
-    const parentMsg = buttonEl.closest('.ai-msg');
-    const content = parentMsg.querySelector('.msg-content-text').innerText;
-    const filename = "SUGAL_AI_Document.doc";
-
-    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>SUGAL AI Document</title></head><body style='font-family: Arial, sans-serif; font-size: 13pt; line-height: 1.6; color: #111;'>";
-    const footer = "</body></html>";
-    const sourceHTML = header + content.replace(/\n/g, "<br>") + footer;
-    const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
-    
-    const fileDownload = document.createElement("a");
-    document.body.appendChild(fileDownload);
-    fileDownload.href = source;
-    fileDownload.download = filename;
-    fileDownload.click();
-    document.body.removeChild(fileDownload);
-};
-
-window.downloadTextAsPDF = function(buttonEl) {
-    const parentMsg = buttonEl.closest('.ai-msg');
-    const content = parentMsg.querySelector('.msg-content-text').innerHTML;
-    
-    const printWindow = window.open('', '', 'height=700,width=800');
-    printWindow.document.write('<html><head><title>SUGAL AI Document</title>');
-    printWindow.document.write('<style>body{font-family: Arial, sans-serif; padding: 40px; font-size: 13pt; line-height: 1.6; color: #222;} h2{color:#0284c7;} strong{color:#0369a1;}</style>');
-    printWindow.document.write('</head><body>');
-    printWindow.document.write('<h2>SUGAL AI Generated Document</h2><hr style="margin-bottom:20px;">');
-    printWindow.document.write(content.replace(/\n/g, "<br>"));
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); }, 400);
-};
-
 // 🔤 MARKDOWN FORMATTER
 function formatMarkdown(text) {
     if (!text) return "";
@@ -286,8 +305,8 @@ window.speakText = function(text) {
     window.speechSynthesis.speak(utterance);
 };
 
-// 🚀 APPEND MESSAGE (WITH OPTIONAL DIRECT FILE DOWNLOAD CARD)
-function appendMessage(role, text, showFileCard = false) {
+// 🚀 APPEND MESSAGE
+function appendMessage(role, text) {
     const list = document.getElementById('messagesList');
     if (!list) return;
 
@@ -297,29 +316,6 @@ function appendMessage(role, text, showFileCard = false) {
     }`;
 
     if (role === 'ai') {
-        let fileCardHTML = '';
-        if (showFileCard) {
-            fileCardHTML = `
-                <div class="mt-3 p-3 rounded-xl bg-blue-950/80 border border-cyan-400/40 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">📄</span>
-                        <div>
-                            <p class="text-xs font-bold text-cyan-300">SUGAL_AI_Document</p>
-                            <p class="text-[10px] text-slate-400">File-kaagii waa diyaar, dooro nooca aad u rabto:</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="downloadTextAsWord(this)" class="px-2.5 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 rounded-lg text-xs font-bold text-cyan-300 flex items-center gap-1">
-                            📝 Soo Daji Word (.doc)
-                        </button>
-                        <button onclick="downloadTextAsPDF(this)" class="px-2.5 py-1 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50 rounded-lg text-xs font-bold text-purple-300 flex items-center gap-1">
-                            📕 Soo Daji PDF
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
         div.innerHTML = `
             <div class="flex justify-between items-start gap-2">
                 <div class="flex-1 msg-content-text">${formatMarkdown(text)}</div>
@@ -327,7 +323,6 @@ function appendMessage(role, text, showFileCard = false) {
                     🔊
                 </button>
             </div>
-            ${fileCardHTML}
         `;
     } else {
         div.innerHTML = formatMarkdown(text);
@@ -532,8 +527,6 @@ async function clearAllHistory() {
         closeModal('historyModal');
     } catch (e) {}
 }
-
-function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
 
 function logout() {
     localStorage.removeItem('user');
