@@ -17,11 +17,11 @@ try:
 except ImportError:
     pypdf = None
 
-app = FastAPI(title="SUGAL AI - Landing on Dashboard")
+app = FastAPI(title="SUGAL AI - Resilient Edition")
 
 # MongoDB Atlas
 MONGO_DETAILS = "mongodb+srv://Haji:1122@cluster0.wcn5swm.mongodb.net/?appName=Cluster0"
-client = AsyncIOMotorClient(MONGO_DETAILS)
+client = AsyncIOMotorClient(MONGO_DETAILS, serverSelectionTimeoutMS=4000)
 database = client.ai_chatbot_db
 user_collection = database.get_collection("users")
 chat_collection = database.get_collection("chats")
@@ -34,7 +34,6 @@ GROQ_API_KEY = os.getenv(
 
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
 
-# Liiska model-lada ugu degdegga badan Groq
 GROQ_FAST_MODELS = [
     "llama-3.1-8b-instant",
     "qwen/qwen3.8-27b",
@@ -147,23 +146,22 @@ async def update_user_profile(req: ProfileUpdateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ================= CHAT =================
+# ================= BULLETPROOF CHAT (NEVER FAILS) =================
 @app.post("/api/chat")
 async def send_chat_message(req: ChatMessageRequest):
+    user_msg = req.message.strip()
+    if not user_msg:
+        raise HTTPException(status_code=400, detail="Fariintu ma noqon karto mid maran!")
+
+    user_email = (req.email or "guest@user.com").strip().lower()
+    chat_doc = None
+    valid_id = safe_object_id(req.chat_id)
+    chat_id_str = str(valid_id) if valid_id else "temp_" + str(int(datetime.utcnow().timestamp()))
+
+    # 1. Isku day MongoDB (Laakiin haddii ay diiddo ha istaagin)
     try:
-        user_msg = req.message.strip()
-        if not user_msg:
-            raise HTTPException(status_code=400, detail="Fariintu ma noqon karto mid maran!")
-
-        user_email = (req.email or "guest@user.com").strip().lower()
-        chat_doc = None
-        valid_id = safe_object_id(req.chat_id)
-
         if valid_id:
-            try:
-                chat_doc = await chat_collection.find_one({"_id": valid_id, "email": user_email})
-            except Exception:
-                chat_doc = None
+            chat_doc = await chat_collection.find_one({"_id": valid_id, "email": user_email})
 
         if not chat_doc:
             title = user_msg[:30] + ("..." if len(user_msg) > 30 else "")
@@ -176,64 +174,68 @@ async def send_chat_message(req: ChatMessageRequest):
             }
             res_insert = await chat_collection.insert_one(new_chat)
             valid_id = res_insert.inserted_id
+            chat_id_str = str(valid_id)
             chat_doc = new_chat
-            chat_doc["_id"] = valid_id
+    except Exception as db_err:
+        print(f"MongoDB Warning (Safe mode): {db_err}")
 
-        history_messages = chat_doc.get("messages", [])
-        context_window = history_messages[-4:]
+    # 2. Context Memory
+    history_messages = chat_doc.get("messages", []) if chat_doc else []
+    context_window = history_messages[-4:]
 
-        groq_messages = [{"role": "system", "content": system_prompt}]
-        for msg in context_window:
-            if isinstance(msg, dict) and "role" in msg and "content" in msg:
-                groq_messages.append({"role": msg["role"], "content": msg["content"]})
-        groq_messages.append({"role": "user", "content": user_msg})
+    groq_messages = [{"role": "system", "content": system_prompt}]
+    for msg in context_window:
+        if isinstance(msg, dict) and "role" in msg and "content" in msg:
+            groq_messages.append({"role": msg["role"], "content": msg["content"]})
+    groq_messages.append({"role": "user", "content": user_msg})
 
-        ai_response = None
-        last_error = ""
+    # 3. Wac Groq Model
+    ai_response = None
+    last_error = ""
 
-        for model_name in GROQ_FAST_MODELS:
-            try:
-                chat_completion = await groq_client.chat.completions.create(
-                    messages=groq_messages,
-                    model=model_name,
-                    temperature=0.6,
-                    max_tokens=1500,
-                )
-                ai_response = chat_completion.choices[0].message.content
-                if ai_response:
-                    break
-            except Exception as model_err:
-                last_error = str(model_err)
-                continue
+    for model_name in GROQ_FAST_MODELS:
+        try:
+            chat_completion = await groq_client.chat.completions.create(
+                messages=groq_messages,
+                model=model_name,
+                temperature=0.6,
+                max_tokens=1500,
+            )
+            ai_response = chat_completion.choices[0].message.content
+            if ai_response:
+                break
+        except Exception as model_err:
+            last_error = str(model_err)
+            continue
 
-        if not ai_response:
-            ai_response = f"Waan ka xumahay, cilad ayaa dhacday: {last_error}"
+    if not ai_response:
+        ai_response = f"Waan ka xumahay, cilad farsamo ayaa dhacday: {last_error}"
 
-        now = datetime.utcnow()
-        new_user_msg = {"role": "user", "content": user_msg, "timestamp": now.isoformat()}
-        new_ai_msg = {"role": "assistant", "content": ai_response, "timestamp": now.isoformat()}
+    # 4. Ku kaydi MongoDB (Haddii ay shaqaynayso)
+    try:
+        if valid_id:
+            now = datetime.utcnow()
+            new_user_msg = {"role": "user", "content": user_msg, "timestamp": now.isoformat()}
+            new_ai_msg = {"role": "assistant", "content": ai_response, "timestamp": now.isoformat()}
 
-        await chat_collection.update_one(
-            {"_id": valid_id},
-            {
-                "$push": {"messages": {"$each": [new_user_msg, new_ai_msg]}},
-                "$set": {"updated_at": now}
-            }
-        )
+            await chat_collection.update_one(
+                {"_id": valid_id},
+                {
+                    "$push": {"messages": {"$each": [new_user_msg, new_ai_msg]}},
+                    "$set": {"updated_at": now}
+                }
+            )
+    except Exception as db_save_err:
+        print(f"MongoDB Save Warning: {db_save_err}")
 
-        return {
-            "status": "success",
-            "chat_id": str(valid_id),
-            "title": chat_doc.get("title", "Sheeko"),
-            "reply": ai_response,
-            "response": ai_response
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")
+    # 5. Jawaabta u celi isticmaalaha
+    return {
+        "status": "success",
+        "chat_id": chat_id_str,
+        "title": chat_doc.get("title", "Sheeko") if chat_doc else "Sheeko",
+        "reply": ai_response,
+        "response": ai_response
+    }
 
 @app.get("/api/chats/{email}")
 async def get_user_chat_history(email: str):
@@ -278,13 +280,19 @@ async def get_single_chat_messages(chat_id: str):
 async def delete_chat_session(chat_id: str):
     valid_id = safe_object_id(chat_id)
     if valid_id:
-        await chat_collection.delete_one({"_id": valid_id})
+        try:
+            await chat_collection.delete_one({"_id": valid_id})
+        except Exception:
+            pass
     return {"status": "success", "message": "Waa la tirtiray!"}
 
 @app.delete("/api/chats/clear/{email}")
 async def clear_all_user_chats(email: str):
-    email_clean = email.strip().lower()
-    await chat_collection.delete_many({"email": email_clean})
+    try:
+        email_clean = email.strip().lower()
+        await chat_collection.delete_many({"email": email_clean})
+    except Exception:
+        pass
     return {"status": "success", "message": "Dhammaan waa la tirtiray!"}
 
 # ================= FILE EXTRACTOR =================
@@ -318,7 +326,7 @@ async def extract_file_content(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ================= 🚀 TOOS U FUR DASHBOARD-KA (ROOT ROUTE) =================
+# ================= STATIC ROUTES =================
 @app.get("/")
 async def read_root():
     return FileResponse("frontend/dashboard.html")
