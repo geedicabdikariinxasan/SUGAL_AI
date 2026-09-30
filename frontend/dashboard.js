@@ -91,7 +91,15 @@ function quickMessage(text) {
     }
 }
 
-// ================= 🚀 SEND MESSAGE (TOOS U QARI HELLO HASSAN) =================
+function openImagePrompt() {
+    const input = document.getElementById('messageInput');
+    if (input) {
+        input.value = "sawir: ";
+        input.focus();
+    }
+}
+
+// ================= 🚀 SEND MESSAGE + AI IMAGE GENERATOR =================
 async function sendMessage(e) {
     if (e) e.preventDefault();
 
@@ -104,7 +112,7 @@ async function sendMessage(e) {
     }
     if (!userPrompt && !attachedFile) return;
 
-    // 🚀 1. HELLO HASSAN & ROBOT-KA GEBI AHAANBA QARI
+    // Qari Hello Hassan
     const welcome = document.getElementById('welcomeBox');
     if (welcome) welcome.style.display = 'none';
 
@@ -116,10 +124,19 @@ async function sendMessage(e) {
         finalPromptToSend = `Dukumentiga magaciisu waa: '${attachedFile.name}'.\nQoraalka:\n"""\n${attachedFile.content}\n"""\n\nSu'aasha: ${userPrompt}`;
     }
 
-    // 🚀 2. MUUJI FARIINTA QOFKA DHEXDA
     appendMessage('user', uiMessage);
     if (input) input.value = '';
     removeAttachedFile();
+
+    // 🎨 CHECK IF USER WANTS AN AI IMAGE (e.g. 'sawir: ...' or '/image ...')
+    const lowerPrompt = userPrompt.toLowerCase();
+    if (lowerPrompt.startsWith("sawir:") || lowerPrompt.startsWith("image:") || lowerPrompt.startsWith("/image")) {
+        const imageSubject = userPrompt.replace(/^(sawir:|image:|\/image)/i, "").trim();
+        if (imageSubject) {
+            handleImageGeneration(imageSubject);
+            return;
+        }
+    }
 
     const typingId = appendTyping();
 
@@ -139,7 +156,6 @@ async function sendMessage(e) {
         if (response.ok) {
             const data = await response.json();
             currentChatId = data.chat_id;
-            // 🚀 3. MUUJI JAWAABTA AI-GA
             appendMessage('ai', data.reply || data.response || 'Haye!');
         } else {
             appendMessage('ai', 'Cillad ayaa dhacday, fadlan dib u tijaabi.');
@@ -150,29 +166,69 @@ async function sendMessage(e) {
     }
 }
 
+// 🎨 AI IMAGE GENERATOR HANDLER
+function handleImageGeneration(promptText) {
+    const typingId = appendTyping("🎨 SUGAL AI wuxuu soo saarayaa sawirkaaga...");
+    
+    setTimeout(() => {
+        removeElement(typingId);
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=1024&height=1024&nologo=true&enhance=true`;
+        
+        const list = document.getElementById('messagesList');
+        if (!list) return;
+
+        const div = document.createElement('div');
+        div.className = 'ai-msg mr-auto p-4 rounded-2xl max-w-[90%] sm:max-w-[75%] rounded-bl-xs space-y-3';
+        div.innerHTML = `
+            <p class="text-xs text-cyan-300 font-semibold">🎨 Waa sawirkii aad codsatay: <em>"${escapeHtml(promptText)}"</em></p>
+            <div class="relative group overflow-hidden rounded-xl border border-cyan-400/40">
+                <img src="${imageUrl}" alt="${escapeHtml(promptText)}" class="w-full h-auto object-cover rounded-xl shadow-lg transition duration-300 hover:scale-[1.02]" loading="lazy">
+            </div>
+            <div class="flex justify-end">
+                <a href="${imageUrl}" target="_blank" download="sugal_ai_image.jpg" class="text-xs font-bold text-cyan-300 hover:underline flex items-center gap-1 bg-blue-900/60 px-3 py-1.5 rounded-lg border border-cyan-500/30">
+                    ⬇️ Soo Daji Sawirka (HD)
+                </a>
+            </div>
+        `;
+        list.appendChild(div);
+        scrollToBottom();
+    }, 1200);
+}
+
+// 🔤 MESSAGE FORMATTER WITH BOLD / BULLET POINTS SUPPORT
+function formatMarkdown(text) {
+    if (!text) return "";
+    let formatted = escapeHtml(text);
+    // Bold: **text** -> <strong>text</strong>
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-cyan-200">$1</strong>');
+    // Bullet points: * text -> • text
+    formatted = formatted.replace(/^\s*\*\s+(.*)$/gm, '• $1');
+    return formatted;
+}
+
 function appendMessage(role, text) {
     const list = document.getElementById('messagesList');
     if (!list) return;
 
     const div = document.createElement('div');
-    div.className = `p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed max-w-[85%] whitespace-pre-wrap ${
+    div.className = `p-3.5 sm:p-4 rounded-2xl message-box max-w-[88%] sm:max-w-[80%] ${
         role === 'user' ? 'user-msg ml-auto text-white rounded-br-xs' : 'ai-msg mr-auto text-slate-100 rounded-bl-xs'
     }`;
-    div.textContent = text;
+    div.innerHTML = formatMarkdown(text);
     list.appendChild(div);
 
     scrollToBottom();
 }
 
-function appendTyping() {
+function appendTyping(customText = "✦ SUGAL AI is thinking...") {
     const id = 'typing_' + Date.now();
     const list = document.getElementById('messagesList');
     if (!list) return id;
 
     const div = document.createElement('div');
     div.id = id;
-    div.className = 'ai-msg mr-auto p-3 rounded-2xl text-xs text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
-    div.innerHTML = `<span>✦ SUGAL AI is thinking...</span>`;
+    div.className = 'ai-msg mr-auto p-3.5 rounded-2xl text-xs sm:text-sm text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
+    div.innerHTML = `<span>${customText}</span>`;
     list.appendChild(div);
 
     scrollToBottom();
@@ -185,10 +241,10 @@ function removeElement(id) {
 }
 
 function scrollToBottom() {
-    const chatArea = document.getElementById('chatArea');
-    if (chatArea) {
+    const scrollContainer = document.getElementById('scrollContainer');
+    if (scrollContainer) {
         setTimeout(() => {
-            chatArea.scrollTop = chatArea.scrollHeight;
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
         }, 50);
     }
 }
@@ -218,6 +274,12 @@ async function handleFiles(files) {
         if (res.ok && data.status === 'success') {
             attachedFile = { name: data.file_name, content: data.extracted_text };
             if (nameEl) nameEl.textContent = `📄 ${data.file_name} (Diyaar)`;
+            
+            const input = document.getElementById('messageInput');
+            if (input) {
+                input.placeholder = `Su'aasha aad ka qabto '${data.file_name}' halkan ku qor...`;
+                input.focus();
+            }
         } else {
             alert('Faylka lama akhriyi karin!');
             removeAttachedFile();
@@ -233,6 +295,38 @@ function removeAttachedFile() {
     const badge = document.getElementById('filePreviewBadge');
     if (badge) badge.classList.add('hidden');
     document.getElementById('fileInput') && (document.getElementById('fileInput').value = '');
+    document.getElementById('pdfInput') && (document.getElementById('pdfInput').value = '');
+}
+
+// ================= VOICE INPUT =================
+function startVoice() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("Browser-kaagu ma taageero Voice. Fadlan isticmaal Google Chrome.");
+        return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'so-SO';
+    recognition.continuous = false;
+
+    const input = document.getElementById('messageInput');
+    if (input) input.placeholder = "Dhagaysanayaa... 🎙️ (Hadal hadda)";
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (input) {
+            input.value = transcript;
+            sendMessage();
+        }
+    };
+    recognition.onerror = () => {
+        if (input) input.placeholder = "Type your question here...";
+    };
+    recognition.onend = () => {
+        if (input) input.placeholder = "Type your question here...";
+    };
+    recognition.start();
 }
 
 // ================= HISTORY =================
@@ -324,10 +418,20 @@ async function clearAllHistory() {
     } catch (e) {}
 }
 
-function showTools() { alert("AI Tools: Translator, Coding Assistant, & Essay Writer."); }
+function showTools() { alert("AI Tools: Translator, Coding Assistant, & AI Image Generator."); }
 function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
 
 function logout() {
     localStorage.removeItem('user');
     location.reload();
+}
+
+function escapeHtml(text) {
+    if (typeof text !== 'string') return text;
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

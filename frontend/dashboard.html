@@ -11,7 +11,6 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* 🚀 LOCK VIEWPORT SI UU INPUT-KU MAR WALBA U MUUQDO */
         html, body {
             position: fixed;
             inset: 0;
@@ -21,7 +20,7 @@
             overflow: hidden;
             background: #02091f;
             color: white;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
         /* SIDEBAR DRAWER */
@@ -41,7 +40,7 @@
             width: 100%; border: none; outline: none; background: transparent;
             color: #b8c9e8; padding: 11px 14px; border-radius: 12px;
             display: flex; align-items: center; gap: 12px; cursor: pointer;
-            text-align: left; transition: .2s; font-size: 13px;
+            text-align: left; transition: .2s; font-size: 13.5px;
         }
         .menu-btn:hover { background: rgba(20, 120, 255, .15); color: white; }
         .menu-btn.active {
@@ -53,18 +52,29 @@
         #scrollContainer::-webkit-scrollbar { width: 5px; }
         #scrollContainer::-webkit-scrollbar-thumb { background: rgba(0, 217, 255, 0.25); border-radius: 10px; }
 
-        /* BUBBLE SHADOWS */
+        /* 🔤 WEELASHA FARIIMAHA OO LA WAYNEEYAY FARTA */
+        .message-box {
+            font-size: 15px; /* Fartii oo la weyneeyay */
+            line-height: 1.65;
+            letter-spacing: 0.01em;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        @media (min-width: 640px) {
+            .message-box { font-size: 15.5px; }
+        }
+
         .user-msg {
             background: linear-gradient(135deg, #116fff, #653dff);
             box-shadow: 0 4px 15px rgba(20, 120, 255, .25);
         }
         .ai-msg {
-            background: rgba(7, 35, 82, .92);
-            border: 1px solid rgba(0, 210, 255, .25);
+            background: rgba(7, 35, 82, .94);
+            border: 1px solid rgba(0, 210, 255, .28);
             box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
         }
 
-        /* MAIN FLEX CONTAINER */
+        /* APP LAYOUT */
         .app-layout {
             display: flex;
             flex-direction: column;
@@ -75,18 +85,18 @@
             position: relative;
         }
 
-        /* MIDDLE CHAT SCROLL AREA */
+        /* 🖥️ MIDDLE CHAT CONTAINER OO LA BALLAARIYAY */
         #scrollContainer {
             flex: 1 1 0%;
             min-height: 0;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 12px 16px;
+            padding: 16px;
             position: relative;
             scroll-behavior: smooth;
         }
 
-        /* INPUT AREA LOCKED AT BOTTOM */
+        /* INPUT BAR AT BOTTOM */
         .bottom-input-bar {
             flex-shrink: 0;
             padding: 8px 14px 12px 14px;
@@ -119,7 +129,8 @@
             <button class="menu-btn active" onclick="goHome(); toggleSidebar();"><span>⌂</span> Home</button>
             <button class="menu-btn" onclick="newChat(); toggleSidebar();"><span>💬</span> New Chat</button>
             <button class="menu-btn" onclick="showHistory(); toggleSidebar();"><span>◷</span> Chat History</button>
-            <button class="menu-btn" onclick="document.getElementById('fileInput').click(); toggleSidebar();"><span>⇧</span> Upload Files</button>
+            <button class="menu-btn" onclick="document.getElementById('fileInput').click(); toggleSidebar();"><span>📎</span> Upload Files</button>
+            <button class="menu-btn" onclick="openImagePrompt(); toggleSidebar();"><span>🎨</span> Generate Image</button>
             <button class="menu-btn" onclick="showTools(); toggleSidebar();"><span>✦</span> AI Tools</button>
         </div>
 
@@ -135,73 +146,94 @@
         </div>
     </aside>
 
-    <!-- ========================================================= -->
-    <!-- APP WRAPPER (TOP BAR, MIDDLE SCROLL, BOTTOM INPUT) -->
-    <!-- ========================================================= -->
+    <!-- APP LAYOUT (FULLSCREEN) -->
     <div class="app-layout">
 
-        <!-- 1. TOP HEADER (FIXED HEIGHT) -->
+        <!-- 1. TOP HEADER -->
         <header class="h-14 min-h-[56px] bg-[#03133e]/95 border-b border-cyan-500/20 px-4 flex items-center gap-3 shrink-0 z-30 backdrop-blur-md">
             <button id="menuToggleBtn" onclick="toggleSidebar()" class="w-9 h-9 rounded-lg border border-cyan-400/40 bg-cyan-400/10 text-cyan-300 flex items-center justify-center text-lg active:scale-95">☰</button>
             
-            <div class="flex-1 max-w-lg h-9 bg-[#061945] border border-cyan-500/30 rounded-full px-3 flex items-center gap-2">
+            <div class="flex-1 max-w-xl h-9 bg-[#061945] border border-cyan-500/30 rounded-full px-3.5 flex items-center gap-2">
                 <span class="text-cyan-400 text-xs">⌕</span>
-                <input id="topSearch" type="text" placeholder="Ask anything..." class="w-full bg-transparent text-xs text-white outline-none" onkeydown="handleTopSearch(event)">
+                <input id="topSearch" type="text" placeholder="Ask anything... or type 'sawir: ...'" class="w-full bg-transparent text-xs text-white outline-none" onkeydown="handleTopSearch(event)">
             </div>
 
             <div id="topAuthArea" class="ml-auto flex items-center gap-2"></div>
         </header>
 
-        <!-- 2. SCROLLABLE MIDDLE BODY -->
+        <!-- 2. SCROLLABLE MIDDLE CONTAINER (MAX-W-4XL EE LA BALLAARIYAY) -->
         <div id="scrollContainer">
-            <!-- GLOW EFFECTS -->
-            <div class="absolute w-72 h-72 rounded-full bg-blue-600/10 blur-3xl right-5 top-10 pointer-events-none"></div>
-            <div class="absolute w-64 h-64 rounded-full bg-purple-600/10 blur-3xl left-5 bottom-10 pointer-events-none"></div>
+            <div class="glow absolute w-72 h-72 rounded-full bg-blue-600/10 blur-3xl right-5 top-10 pointer-events-none"></div>
+            <div class="glow absolute w-64 h-64 rounded-full bg-purple-600/10 blur-3xl left-5 bottom-10 pointer-events-none"></div>
 
-            <!-- WELCOME SCREEN (QARI MARKA SHEEKADU SOO GASHO) -->
-            <div id="welcomeBox" class="flex flex-col items-center justify-center text-center py-6 max-w-xl mx-auto w-full my-auto">
-                <span class="px-3 py-1 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-400/10 border border-cyan-400/30">SUGAL AI</span>
-                <h1 class="text-2xl sm:text-3xl font-black mt-2">Hello, <span id="welcomeName" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400">Hassan Abdikariin</span> 👋</h1>
-                <p class="text-xs text-slate-400 mt-1 max-w-md">Your AI assistant is ready! Ask questions, code, analyze documents, and more.</p>
+            <!-- WELCOME SCREEN -->
+            <div id="welcomeBox" class="flex flex-col items-center justify-center text-center py-6 max-w-2xl mx-auto w-full my-auto">
+                <span class="px-3.5 py-1 rounded-full text-xs font-bold text-cyan-300 bg-cyan-400/10 border border-cyan-400/30">SUGAL AI</span>
+                <h1 class="text-3xl sm:text-4xl font-black mt-2.5">Hello, <span id="welcomeName" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400">Hassan Abdikariin</span> 👋</h1>
+                <p class="text-sm text-slate-300 mt-1.5 max-w-lg">Your AI assistant is ready! Ask questions, code, analyze documents, and generate AI images.</p>
 
                 <!-- ROBOT -->
-                <div class="w-24 h-20 sm:w-28 sm:h-24 my-3 rounded-[40%] bg-gradient-to-br from-white to-cyan-200 border-2 border-cyan-300 flex items-center justify-center text-4xl sm:text-5xl shadow-[0_0_30px_rgba(0,217,255,0.35)]">🤖</div>
+                <div class="w-24 h-20 sm:w-28 sm:h-24 my-4 rounded-[40%] bg-gradient-to-br from-white to-cyan-200 border-2 border-cyan-300 flex items-center justify-center text-4xl sm:text-5xl shadow-[0_0_30px_rgba(0,217,255,0.35)]">🤖</div>
 
-                <!-- QUICK ACTION BUTTONS -->
+                <!-- QUICK ACTIONS -->
                 <div class="flex flex-wrap justify-center gap-2 mt-1">
-                    <button onclick="quickMessage('Magaalooyinka ugu waaweyn Soomaaliya ma ii sheegi kartaa?')" class="text-xs px-3 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40">💡 Su'aalo Weydii</button>
-                    <button onclick="quickMessage('Isku qor maqaal kooban oo ku saabsan AI')" class="text-xs px-3 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40">✍️ Maqaal Qor</button>
-                    <button onclick="quickMessage('Koodh Python ah oo calculator ah ii samee')" class="text-xs px-3 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40">💻 Koodh Samee</button>
+                    <button onclick="quickMessage('Magaalooyinka ugu waaweyn Soomaaliya ma ii sheegi kartaa?')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40">💡 Su'aalo Weydii</button>
+                    <button onclick="quickMessage('sawir: a futuristic Somali smart city with flying cars in 2050')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-900/40 text-cyan-200 hover:bg-cyan-800/50">🎨 Samee Sawir AI</button>
+                    <button onclick="quickMessage('Koodh Python ah oo calculator ah ii samee')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40">💻 Koodh Samee</button>
                 </div>
             </div>
 
-            <!-- CHAT MESSAGES LIST -->
-            <div id="messagesList" class="w-full max-w-2xl mx-auto space-y-3 pb-3"></div>
+            <!-- CHAT MESSAGES LIST (LA BALLAARIYAY OO FARTA LOO WEELAY) -->
+            <div id="messagesList" class="w-full max-w-4xl mx-auto space-y-4 pb-4"></div>
         </div>
 
-        <!-- ATTACHED FILE BADGE -->
-        <div id="filePreviewBadge" class="hidden px-4 py-1 bg-[#02091f] shrink-0">
-            <div class="flex items-center gap-2 bg-blue-900/80 border border-cyan-400/40 text-cyan-300 px-3 py-1 rounded-xl w-fit text-xs font-semibold mx-auto">
+        <!-- ATTACHED FILE PREVIEW BADGE -->
+        <div id="filePreviewBadge" class="hidden px-4 py-1.5 bg-[#02091f] shrink-0">
+            <div class="flex items-center gap-2 bg-blue-900/80 border border-cyan-400/40 text-cyan-300 px-3.5 py-1 rounded-xl w-fit text-xs font-semibold mx-auto">
                 <span>📄</span>
-                <span id="attachedFileName" class="truncate max-w-[200px]">file.pdf</span>
+                <span id="attachedFileName" class="truncate max-w-[220px]">file.pdf</span>
                 <button onclick="removeAttachedFile()" class="text-red-400 hover:text-red-300 ml-1 font-bold">✕</button>
             </div>
         </div>
 
-        <!-- 3. BOTTOM INPUT FORM (MAR WALBA HOOSTA KU DHEX JIRA) -->
+        <!-- 3. BOTTOM INPUT FORM (OO LEH 3-DII ASTAAMOOD: 📎 📄 🎙️ + 🎨) -->
         <div class="bottom-input-bar">
-            <form id="chatForm" onsubmit="sendMessage(event)" class="max-w-2xl mx-auto flex items-center gap-2 bg-[#06183d] border border-cyan-400/80 rounded-full px-3.5 py-1.5 shadow-[0_0_20px_rgba(0,217,255,0.15)] focus-within:border-cyan-300">
-                <span class="text-cyan-400 text-base pl-1">✦</span>
-                <input id="messageInput" type="text" placeholder="Type your question here..." autocomplete="off" class="flex-1 bg-transparent text-white text-xs sm:text-sm outline-none py-1.5">
-                <button type="submit" id="sendBtn" class="w-9 h-9 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white shrink-0 active:scale-95 shadow-md">➤</button>
+            <form id="chatForm" onsubmit="sendMessage(event)" class="max-w-4xl mx-auto flex items-center gap-1.5 sm:gap-2 bg-[#06183d] border border-cyan-400/70 rounded-full px-2.5 sm:px-4 py-1.5 shadow-[0_0_20px_rgba(0,217,255,0.15)] focus-within:border-cyan-300">
+                
+                <!-- 📎 BUTTON 1: ATTACH FILE -->
+                <button type="button" onclick="document.getElementById('fileInput').click()" title="Attach File" class="p-1.5 text-cyan-400 hover:text-white hover:bg-blue-900/40 rounded-full transition text-sm">
+                    📎
+                </button>
+
+                <!-- 📄 BUTTON 2: UPLOAD PDF -->
+                <button type="button" onclick="document.getElementById('pdfInput').click()" title="Upload PDF Document" class="p-1.5 text-cyan-400 hover:text-white hover:bg-blue-900/40 rounded-full transition text-sm">
+                    📄
+                </button>
+
+                <!-- 🎨 BUTTON 3: GENERATE IMAGE -->
+                <button type="button" onclick="openImagePrompt()" title="Generate AI Image" class="p-1.5 text-cyan-400 hover:text-white hover:bg-blue-900/40 rounded-full transition text-sm">
+                    🎨
+                </button>
+
+                <!-- INPUT FIELD (FARTU WAA 15px) -->
+                <input id="messageInput" type="text" placeholder="Type a message or 'sawir: ...'" autocomplete="off" class="flex-1 bg-transparent text-white text-sm sm:text-base outline-none px-1 py-1">
+
+                <!-- 🎙️ BUTTON 4: VOICE INPUT -->
+                <button type="button" onclick="startVoice()" title="Voice Input" class="p-1.5 text-cyan-400 hover:text-white hover:bg-blue-900/40 rounded-full transition text-sm">
+                    🎙️
+                </button>
+
+                <!-- SEND BUTTON -->
+                <button type="submit" id="sendBtn" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white shrink-0 active:scale-95 shadow-md text-sm sm:text-base">➤</button>
             </form>
-            <p class="text-center text-[9px] text-slate-500 mt-1">Powered by SUGAL AI • Smarter • Faster</p>
+            <p class="text-center text-[10px] text-slate-500 mt-1">Powered by SUGAL AI • Smarter • Faster</p>
         </div>
 
     </div>
 
-    <!-- HIDDEN FILE INPUT -->
+    <!-- HIDDEN FILE INPUTS -->
     <input type="file" id="fileInput" class="hidden" accept=".txt,.pdf,.docx,.doc" onchange="handleFiles(this.files)">
+    <input type="file" id="pdfInput" class="hidden" accept=".pdf" onchange="handleFiles(this.files)">
 
     <!-- HISTORY MODAL -->
     <div id="historyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
