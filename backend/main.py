@@ -1,5 +1,7 @@
 import os
 import io
+import time
+import random
 import traceback
 from datetime import datetime
 from bson import ObjectId
@@ -17,7 +19,7 @@ try:
 except ImportError:
     pypdf = None
 
-app = FastAPI(title="SUGAL AI - Resilient Edition")
+app = FastAPI(title="SUGAL AI - Professional Edition")
 
 # MongoDB Atlas
 MONGO_DETAILS = "mongodb+srv://Haji:1122@cluster0.wcn5swm.mongodb.net/?appName=Cluster0"
@@ -79,16 +81,20 @@ class ChatMessageRequest(BaseModel):
     email: str = "guest@user.com"
     chat_id: str | None = None
 
+class ImageGenRequest(BaseModel):
+    prompt: str
+    email: str = "guest@user.com"
+
 class ProfileUpdateRequest(BaseModel):
     email: str
     fullName: str
 
 system_prompt = """
-You are SUGAL AI, a fast, highly intelligent, friendly, and respectful AI assistant.
+You are SUGAL AI, a world-class, highly intelligent, friendly, and respectful multilingual AI assistant.
 Rules:
 1. Always reply in the EXACT SAME LANGUAGE the user writes in (Somali, Arabic, English, etc.).
-2. If Somali, reply in natural, respectful, and rich Somali.
-3. Be clear, accurate, helpful, and fast in your answers.
+2. If Somali, reply in natural, rich, respectful, and crystal-clear Somali.
+3. Use clear formatting, bullet points, and code blocks where appropriate.
 """
 
 # ================= AUTH =================
@@ -146,7 +152,49 @@ async def update_user_profile(req: ProfileUpdateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ================= BULLETPROOF CHAT (NEVER FAILS) =================
+# ================= 🎨 AI IMAGE GENERATOR ENGINE =================
+@app.post("/api/generate-image")
+async def generate_ai_image(req: ImageGenRequest):
+    user_prompt = req.prompt.strip()
+    if not user_prompt:
+        raise HTTPException(status_code=400, detail="Fadlan qor sawirka aad rabto!")
+
+    # 1. U beddel prompt-ka Ingiriis faahfaahsan oo tayo sare leh adigoo isticmaalaya Groq LLM
+    enhanced_prompt = user_prompt
+    try:
+        completion = await groq_client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert AI prompt engineer. Translate the user's image request (which may be in Somali, Arabic, or English) into an ultra-detailed, photorealistic, cinematic English visual prompt (under 35 words). Avoid generic text. Return ONLY the prompt text, no quotes."
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+            ],
+            model="llama-3.1-8b-instant",
+            max_tokens=80,
+            temperature=0.7
+        )
+        enhanced_prompt = completion.choices[0].message.content.strip().strip('"')
+    except Exception as e:
+        print(f"Prompt enhance warning: {e}")
+        enhanced_prompt = user_prompt
+
+    # 2. Samee Link-ga sawirka HD-ga ah
+    seed = random.randint(1000, 999999)
+    safe_prompt = enhanced_prompt.replace("/", " ").replace("?", " ").strip()
+    image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1024&height=1024&seed={seed}&nologo=true&enhance=true&model=flux"
+
+    return {
+        "status": "success",
+        "original_prompt": user_prompt,
+        "enhanced_prompt": enhanced_prompt,
+        "image_url": image_url
+    }
+
+# ================= CHAT =================
 @app.post("/api/chat")
 async def send_chat_message(req: ChatMessageRequest):
     user_msg = req.message.strip()
@@ -158,7 +206,6 @@ async def send_chat_message(req: ChatMessageRequest):
     valid_id = safe_object_id(req.chat_id)
     chat_id_str = str(valid_id) if valid_id else "temp_" + str(int(datetime.utcnow().timestamp()))
 
-    # 1. Isku day MongoDB (Laakiin haddii ay diiddo ha istaagin)
     try:
         if valid_id:
             chat_doc = await chat_collection.find_one({"_id": valid_id, "email": user_email})
@@ -177,9 +224,8 @@ async def send_chat_message(req: ChatMessageRequest):
             chat_id_str = str(valid_id)
             chat_doc = new_chat
     except Exception as db_err:
-        print(f"MongoDB Warning (Safe mode): {db_err}")
+        print(f"MongoDB Warning: {db_err}")
 
-    # 2. Context Memory
     history_messages = chat_doc.get("messages", []) if chat_doc else []
     context_window = history_messages[-4:]
 
@@ -189,7 +235,6 @@ async def send_chat_message(req: ChatMessageRequest):
             groq_messages.append({"role": msg["role"], "content": msg["content"]})
     groq_messages.append({"role": "user", "content": user_msg})
 
-    # 3. Wac Groq Model
     ai_response = None
     last_error = ""
 
@@ -209,9 +254,8 @@ async def send_chat_message(req: ChatMessageRequest):
             continue
 
     if not ai_response:
-        ai_response = f"Waan ka xumahay, cilad farsamo ayaa dhacday: {last_error}"
+        ai_response = f"Waan ka xumahay, cilad ayaa dhacday: {last_error}"
 
-    # 4. Ku kaydi MongoDB (Haddii ay shaqaynayso)
     try:
         if valid_id:
             now = datetime.utcnow()
@@ -228,7 +272,6 @@ async def send_chat_message(req: ChatMessageRequest):
     except Exception as db_save_err:
         print(f"MongoDB Save Warning: {db_save_err}")
 
-    # 5. Jawaabta u celi isticmaalaha
     return {
         "status": "success",
         "chat_id": chat_id_str,
@@ -295,7 +338,7 @@ async def clear_all_user_chats(email: str):
         pass
     return {"status": "success", "message": "Dhammaan waa la tirtiray!"}
 
-# ================= FILE EXTRACTOR =================
+# ================= FILE & IMAGE EXTRACTOR =================
 @app.post("/api/extract-file")
 async def extract_file_content(file: UploadFile = File(...)):
     try:
@@ -303,12 +346,19 @@ async def extract_file_content(file: UploadFile = File(...)):
         filename_lower = file.filename.lower()
         extracted_text = ""
 
-        if filename_lower.endswith(".pdf"):
+        # Haddii uu yahay Sawir (Image)
+        if any(filename_lower.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp', '.bmp']):
+            extracted_text = f"Sawir la magac baxay '{file.filename}' ayaa lagu lifaaqay. Fadlan falanqee oo faahfaahin ka bixi waxa la weydiiyo."
+
+        # Haddii uu yahay PDF
+        elif filename_lower.endswith(".pdf"):
             if pypdf:
                 reader = pypdf.PdfReader(io.BytesIO(content_bytes))
                 extracted_text = "\n".join([p.extract_text() or "" for p in reader.pages]).strip()
             else:
                 extracted_text = "PDF reader library is loading."
+
+        # Haddii uu yahay Text/Doc
         else:
             try:
                 extracted_text = content_bytes.decode("utf-8", errors="ignore").strip()
@@ -316,7 +366,7 @@ async def extract_file_content(file: UploadFile = File(...)):
                 extracted_text = content_bytes.decode("latin-1", errors="ignore").strip()
 
         if not extracted_text:
-            extracted_text = f"Dukumentiga '{file.filename}' ma laha qoraal la akhriyi karo."
+            extracted_text = f"Dukumentiga/Sawirka '{file.filename}' ma laha qoraal toos ah."
 
         return {
             "status": "success",
