@@ -3,10 +3,7 @@ let allUserChats = [];
 let attachedFile = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Habee Top Bar & Profile Status (Guest vs User)
     renderTopAuthNav();
-
-    // 2. Haddii uu qofku hore u soo galay, soo deji History
     const user = getUserData();
     if (user && user.email) {
         await loadUserHistory();
@@ -19,176 +16,38 @@ function getUserData() {
     try { return JSON.parse(userDataStr); } catch (e) { return null; }
 }
 
-// ================= TOP NAVBAR & AUTH STATUS =================
 function renderTopAuthNav() {
     const user = getUserData();
     const topAuthArea = document.getElementById('topAuthArea');
     const sidebarAvatar = document.getElementById('sidebarAvatar');
     const sidebarUserName = document.getElementById('sidebarUserName');
-    const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
     const welcomeName = document.getElementById('welcomeName');
-    const guestPromptBanner = document.getElementById('guestPromptBanner');
 
     if (!topAuthArea) return;
 
     if (user && user.email) {
-        const userName = user.fullName || user.full_name || user.name || 'User';
+        const userName = user.fullName || user.full_name || user.name || 'Hassan Abdikariin';
         const initial = userName.charAt(0).toUpperCase();
 
         topAuthArea.innerHTML = `
-            <div class="flex items-center gap-2 bg-[#06183d] px-3 py-1.5 rounded-2xl border border-cyan-500/20">
-                <div class="avatar">${initial}</div>
-                <div class="hidden sm:block text-left">
-                    <p class="text-xs font-bold text-slate-200">${userName}</p>
-                    <p class="text-[9px] text-emerald-400">● Online</p>
-                </div>
+            <div class="flex items-center gap-2 bg-[#06183d] px-2.5 py-1 rounded-2xl border border-cyan-500/20">
+                <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-xs text-white">${initial}</div>
+                <p class="text-xs font-bold text-slate-200 hidden sm:block">${userName}</p>
             </div>
         `;
 
         if (welcomeName) welcomeName.textContent = userName;
         if (sidebarAvatar) sidebarAvatar.textContent = initial;
         if (sidebarUserName) sidebarUserName.textContent = userName;
-        if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
-        if (guestPromptBanner) guestPromptBanner.classList.add('hidden');
-
     } else {
-        // Qofku waa Guest (Muuji Badhamada Login & Sign Up ee dusha sare)
         topAuthArea.innerHTML = `
-            <button onclick="openAuthModal('login')" class="px-3 py-1.5 border border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 rounded-xl text-xs font-semibold transition">
-                Login
-            </button>
-            <button onclick="openAuthModal('register')" class="px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white rounded-xl text-xs font-bold shadow-md transition">
-                Sign Up
-            </button>
+            <a href="login.html" class="px-2.5 py-1 border border-cyan-400/40 text-cyan-300 rounded-xl text-xs font-semibold">Login</a>
+            <a href="register.html" class="px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-xs font-bold">Sign Up</a>
         `;
-
         if (welcomeName) welcomeName.textContent = "Friend";
-        if (sidebarAvatar) sidebarAvatar.textContent = "G";
-        if (sidebarUserName) sidebarUserName.textContent = "Guest User";
-        if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
-        if (guestPromptBanner) guestPromptBanner.classList.remove('hidden');
     }
 }
 
-// ================= AUTH MODAL (LOGIN & REGISTER) =================
-function openAuthModal(tab = 'login') {
-    const modal = document.getElementById('authModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        switchAuthTab(tab);
-    }
-}
-
-function switchAuthTab(tab) {
-    const tabLoginBtn = document.getElementById('tabLoginBtn');
-    const tabRegisterBtn = document.getElementById('tabRegisterBtn');
-    const modalLoginForm = document.getElementById('modalLoginForm');
-    const modalRegisterForm = document.getElementById('modalRegisterForm');
-    const authErrorMsg = document.getElementById('authErrorMsg');
-
-    if (authErrorMsg) authErrorMsg.classList.add('hidden');
-
-    if (tab === 'login') {
-        tabLoginBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition bg-blue-600 text-white";
-        tabRegisterBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white";
-        modalLoginForm.classList.remove('hidden');
-        modalRegisterForm.classList.add('hidden');
-    } else {
-        tabRegisterBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition bg-blue-600 text-white";
-        tabLoginBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white";
-        modalRegisterForm.classList.remove('hidden');
-        modalLoginForm.classList.add('hidden');
-    }
-}
-
-async function handleModalLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('modalLoginEmail').value.trim();
-    const password = document.getElementById('modalLoginPassword').value.trim();
-    const errorBox = document.getElementById('authErrorMsg');
-    const btn = document.getElementById('modalLoginSubmitBtn');
-
-    if (btn) { btn.disabled = true; btn.textContent = "Galayaa... ⏳"; }
-    if (errorBox) errorBox.classList.add('hidden');
-
-    try {
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-
-        if (res.ok && data.status === 'success') {
-            localStorage.setItem('user', JSON.stringify(data.user));
-            closeModal('authModal');
-            renderTopAuthNav();
-            await loadUserHistory();
-        } else {
-            if (errorBox) {
-                errorBox.textContent = data.detail || "Email-ka ama Password-ka waa khalad!";
-                errorBox.classList.remove('hidden');
-            }
-        }
-    } catch (err) {
-        if (errorBox) {
-            errorBox.textContent = "Server-ka laguma xiri karin!";
-            errorBox.classList.remove('hidden');
-        }
-    } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "Soo Gal (Login)"; }
-    }
-}
-
-async function handleModalRegister(e) {
-    e.preventDefault();
-    const fullName = document.getElementById('modalRegName').value.trim();
-    const email = document.getElementById('modalRegEmail').value.trim();
-    const password = document.getElementById('modalRegPassword').value.trim();
-    const errorBox = document.getElementById('authErrorMsg');
-    const btn = document.getElementById('modalRegSubmitBtn');
-
-    if (btn) { btn.disabled = true; btn.textContent = "Abuurayaa... ⏳"; }
-    if (errorBox) errorBox.classList.add('hidden');
-
-    try {
-        const res = await fetch('/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fullName, email, password })
-        });
-        const data = await res.json();
-
-        if (res.ok && data.status === 'success') {
-            const loginRes = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const loginData = await loginRes.json();
-            if (loginRes.ok && loginData.status === 'success') {
-                localStorage.setItem('user', JSON.stringify(loginData.user));
-                closeModal('authModal');
-                renderTopAuthNav();
-                await loadUserHistory();
-            }
-        } else {
-            if (errorBox) {
-                errorBox.textContent = data.detail || "Diiwaangelintu kuma guuleysan!";
-                errorBox.classList.remove('hidden');
-            }
-        }
-    } catch (err) {
-        if (errorBox) {
-            errorBox.textContent = "Server-ka laguma xiri karin!";
-            errorBox.classList.remove('hidden');
-        }
-    } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "Abuur Account (Register)"; }
-    }
-}
-
-// ================= SIDEBAR & NAVIGATION =================
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
@@ -202,13 +61,11 @@ function toggleSidebar() {
 function goHome() {
     currentChatId = null;
     removeAttachedFile();
-    const welcome = document.getElementById('welcome');
-    const chatArea = document.getElementById('chatArea');
-    const messages = document.getElementById('messages');
+    const welcome = document.getElementById('welcomeBox');
+    const messagesList = document.getElementById('messagesList');
 
-    if (welcome) welcome.classList.remove('hidden');
-    if (chatArea) chatArea.classList.add('hidden');
-    if (messages) messages.innerHTML = '';
+    if (welcome) welcome.style.display = 'flex';
+    if (messagesList) messagesList.innerHTML = '';
 }
 
 function newChat() {
@@ -216,7 +73,6 @@ function newChat() {
     closeModal('historyModal');
 }
 
-// ================= CHAT LOGIC (GUEST & USER) =================
 function handleTopSearch(e) {
     if (e.key === 'Enter') {
         const topInput = document.getElementById('topSearch');
@@ -235,6 +91,7 @@ function quickMessage(text) {
     }
 }
 
+// ================= 🚀 SEND MESSAGE (TOOS U QARI HELLO HASSAN) =================
 async function sendMessage(e) {
     if (e) e.preventDefault();
 
@@ -247,11 +104,9 @@ async function sendMessage(e) {
     }
     if (!userPrompt && !attachedFile) return;
 
-    // Beddel shaashadda oo gal Chat View
-    const welcome = document.getElementById('welcome');
-    const chatArea = document.getElementById('chatArea');
-    if (welcome) welcome.classList.add('hidden');
-    if (chatArea) chatArea.classList.remove('hidden');
+    // 🚀 1. HELLO HASSAN & ROBOT-KA GEBI AHAANBA QARI
+    const welcome = document.getElementById('welcomeBox');
+    if (welcome) welcome.style.display = 'none';
 
     let uiMessage = userPrompt;
     let finalPromptToSend = userPrompt;
@@ -261,6 +116,7 @@ async function sendMessage(e) {
         finalPromptToSend = `Dukumentiga magaciisu waa: '${attachedFile.name}'.\nQoraalka:\n"""\n${attachedFile.content}\n"""\n\nSu'aasha: ${userPrompt}`;
     }
 
+    // 🚀 2. MUUJI FARIINTA QOFKA DHEXDA
     appendMessage('user', uiMessage);
     if (input) input.value = '';
     removeAttachedFile();
@@ -283,6 +139,7 @@ async function sendMessage(e) {
         if (response.ok) {
             const data = await response.json();
             currentChatId = data.chat_id;
+            // 🚀 3. MUUJI JAWAABTA AI-GA
             appendMessage('ai', data.reply || data.response || 'Haye!');
         } else {
             appendMessage('ai', 'Cillad ayaa dhacday, fadlan dib u tijaabi.');
@@ -294,27 +151,29 @@ async function sendMessage(e) {
 }
 
 function appendMessage(role, text) {
-    const messages = document.getElementById('messages');
-    if (!messages) return;
+    const list = document.getElementById('messagesList');
+    if (!list) return;
 
     const div = document.createElement('div');
-    div.className = `message ${role === 'user' ? 'user-message' : 'ai-message'}`;
+    div.className = `p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed max-w-[85%] whitespace-pre-wrap ${
+        role === 'user' ? 'user-msg ml-auto text-white rounded-br-xs' : 'ai-msg mr-auto text-slate-100 rounded-bl-xs'
+    }`;
     div.textContent = text;
-    messages.appendChild(div);
+    list.appendChild(div);
 
     scrollToBottom();
 }
 
 function appendTyping() {
     const id = 'typing_' + Date.now();
-    const messages = document.getElementById('messages');
-    if (!messages) return id;
+    const list = document.getElementById('messagesList');
+    if (!list) return id;
 
     const div = document.createElement('div');
     div.id = id;
-    div.className = 'message ai-message flex items-center gap-2';
+    div.className = 'ai-msg mr-auto p-3 rounded-2xl text-xs text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
     div.innerHTML = `<span>✦ SUGAL AI is thinking...</span>`;
-    messages.appendChild(div);
+    list.appendChild(div);
 
     scrollToBottom();
     return id;
@@ -328,11 +187,13 @@ function removeElement(id) {
 function scrollToBottom() {
     const chatArea = document.getElementById('chatArea');
     if (chatArea) {
-        chatArea.scrollTop = chatArea.scrollHeight;
+        setTimeout(() => {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }, 50);
     }
 }
 
-// ================= FILE ATTACH =================
+// ================= FILE UPLOAD =================
 async function handleFiles(files) {
     if (!files || files.length === 0) return;
     const file = files[0];
@@ -391,12 +252,6 @@ async function loadUserHistory() {
 }
 
 function showHistory() {
-    const user = getUserData();
-    if (!user || !user.email) {
-        openAuthModal('login');
-        return;
-    }
-
     const modal = document.getElementById('historyModal');
     const list = document.getElementById('modalHistoryList');
     if (!modal || !list) return;
@@ -407,10 +262,10 @@ function showHistory() {
     } else {
         allUserChats.forEach(chat => {
             const item = `
-                <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-900/40 cursor-pointer border-b border-cyan-500/10 transition" onclick="openChat('${chat.chat_id}')">
-                    <div class="flex items-center gap-2">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-blue-950/40 hover:bg-blue-900/60 cursor-pointer border border-cyan-500/10 transition" onclick="openChat('${chat.chat_id}')">
+                    <div class="flex items-center gap-2 min-w-0">
                         <span>💬</span>
-                        <p class="text-xs font-semibold text-slate-200 truncate max-w-[220px]">${escapeHtml(chat.title)}</p>
+                        <p class="text-xs font-semibold text-slate-200 truncate max-w-[200px]">${chat.title}</p>
                     </div>
                     <button onclick="deleteChat('${chat.chat_id}', event)" class="p-1 text-slate-400 hover:text-red-400">✕</button>
                 </div>
@@ -426,13 +281,11 @@ async function openChat(chatId) {
     currentChatId = chatId;
     closeModal('historyModal');
 
-    const welcome = document.getElementById('welcome');
-    const chatArea = document.getElementById('chatArea');
-    const messages = document.getElementById('messages');
+    const welcome = document.getElementById('welcomeBox');
+    const messagesList = document.getElementById('messagesList');
 
-    if (welcome) welcome.classList.add('hidden');
-    if (chatArea) chatArea.classList.remove('hidden');
-    if (messages) messages.innerHTML = '';
+    if (welcome) welcome.style.display = 'none';
+    if (messagesList) messagesList.innerHTML = '';
 
     try {
         const res = await fetch(`/api/chat/${chatId}`);
@@ -472,20 +325,9 @@ async function clearAllHistory() {
 }
 
 function showTools() { alert("AI Tools: Translator, Coding Assistant, & Essay Writer."); }
-function showSettings() { alert("Settings: Ultra-Fast AI Engine Enabled."); }
 function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
 
 function logout() {
     localStorage.removeItem('user');
     location.reload();
-}
-
-function escapeHtml(text) {
-    if (typeof text !== 'string') return text;
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
 }
