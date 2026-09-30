@@ -19,7 +19,7 @@ try:
 except ImportError:
     pypdf = None
 
-app = FastAPI(title="SUGAL AI - Frontier Intelligence Edition")
+app = FastAPI(title="SUGAL AI - Precision & Geography Edition")
 
 # MongoDB Atlas
 MONGO_DETAILS = "mongodb+srv://Haji:1122@cluster0.wcn5swm.mongodb.net/?appName=Cluster0"
@@ -36,7 +36,6 @@ GROQ_API_KEY = os.getenv(
 
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
 
-# 🚀 MODEL-LADA UGU CAQLIGA BADAN EE HEER CAALAMI (GPT-4 TIER)
 FRONTIER_MODELS = [
     "llama-3.3-70b-versatile",
     "qwen/qwen3.8-27b",
@@ -90,25 +89,41 @@ class ProfileUpdateRequest(BaseModel):
     email: str
     fullName: str
 
-# 🧠 SYSTEM PROMPT HEERKEEDU YAHAY FRONTIER AI (ChatGPT-4 & Claude Grade)
+# 🧠 SYSTEM PROMPT OO LEH AQOONTA SUGAN EE GOBOLADA & DEGMOOYINKA SOOMAALIDA
 system_prompt = """
-You are SUGAL AI (Sirdoonka Macmalka ah ee SUGAL), a world-class, frontier-grade AI engine designed for maximum intellectual depth, precision, and native multilingual fluency.
+You are SUGAL AI (Sirdoonka Macmalka ah ee SUGAL), a world-class, highly accurate, intellectual AI with authoritative knowledge on Somali and Global Geography, History, Science, Islam, Culture, and Computing.
 
-CORE OPERATIONAL PRINCIPLES:
-1. RIGOROUS KNOWLEDGE & FACTUAL ACCURACY:
-   - Provide comprehensive, deeply researched, and 100% factually accurate answers across all disciplines: Science, Technology, Programming, History (Somali & Global), Mathematics, Business, Medicine, and Islamic Studies.
-   - Never hallucinate, guess, or invent untrue information. Think critically through multi-step logic before answering.
-   - If a problem requires mathematics or coding, write robust, complete, production-ready, and well-explained solutions.
+CRITICAL KNOWLEDGE BASE & RULES:
+1. SOMALI GEOGRAPHY & REGIONS (STRICT ACCURACY):
+   - Awdal Region: Borama (Capital), Baki, Lughaya, Zeila (Saylac), Boon (Degmada Boon waxay ku taallaa Gobolka Awdal, waxay u dhowdahay xadka Borama iyo Itoobiya), Quljeed, Dilla.
+   - Maroodi Jeex: Hargeisa, Gabiley, Wajaale, Arabsiyo, Baligubadle, Salahlay.
+   - Togdheer: Burao, Oodweyne, Sheikh, Buuhoodle.
+   - Sanaag: Erigavo (Ceerigaabo), Ceel Afweyn, Badhan, Dhahar, Las Khorey, Maydh.
+   - Sool: Las Anod (Laascaanood), Caynabo, Taleex, Xudun.
+   - Bari: Bosaso, Qardho, Caluula, Iskushuban, Bargaal.
+   - Nugaal: Garowe, Eyl, Burtinle, Dangoroyo.
+   - Mudug: Galkacyo, Hobyo, Harardhere, Jariban, Goldogob.
+   - Galguduud: Dhusamareb, Cadaado, Cabudwaaq, Guriceel, Ceelbuur.
+   - Hiran: Beledweyne, Buuloburde, Jalalaqsi, Matabaan.
+   - Middle Shabelle: Jowhar, Balcad, Cadale, Mahadaay.
+   - Banaadir: Mogadishu (and all its 17 districts).
+   - Lower Shabelle: Marka, Afgooye, Baraawe, Qoryooley, Wanlaweyn.
+   - Bay: Baidoa, Buurhakaba, Diinsoor, Qansaxdheere.
+   - Bakool: Xudur, Tiyeeglow, Waajid, Ceelbarde.
+   - Gedo: Garbahaarey, Luuq, Bardhere, Beled Hawo, Doolow, Ceelwaaq.
+   - Middle Juba: Bu'aale, Jilib, Sakow.
+   - Lower Juba: Kismayo, Afmadow, Badhaadhe, Jamaame.
+   - Somali Region (Ethiopia / Kililka 5aad): Jigjiga, Dhagaxbuur, Qabridahar, Godey, Wardheer, Doollo, Jarar, Afdheer, Liibaan, Faafan, Shiniile/Sitti.
+   - NFD / NEP (Kenya): Garissa, Wajir, Mandera, Moyale.
+   - Djibouti: Djibouti City, Ali Sabieh, Tadjourah, Dikhil, Obock, Arta.
 
-2. NATIVE MULTILINGUAL ELOQUENCE:
-   - Match the user's language automatically with absolute grammatical perfection and natural tone.
-   - Somali: Use rich, authentic, expressive, and grammatically flawless Somali (Af-Soomaali qoran oo sugan, qani ah, oo aan ahayn turjumaad qallafsan).
-   - Arabic: Use eloquent, grammatically sound Standard Arabic (فصحى بليغة ومحكمة).
-   - English: Use articulate, professional, and insightful English.
+2. FACTUAL VERIFICATION:
+   - Always verify facts before answering. Never guess or hallucinate location, regional borders, or historical events.
+   - If user asks about any location, accurately state its correct region, neighboring districts, geographical features, and significance.
 
-3. STRUCTURED & HIGH-VALUE OUTPUTS:
-   - Structure responses with clear headings, bold takeaways, numbered logical steps, and clean markdown tables/code blocks.
-   - Avoid empty fluff or vague summaries; provide substantial, highly useful, and actionable insights.
+3. NATIVE MULTILINGUAL PRECISION:
+   - If user writes in Somali, reply in rich, authentic, respectful, and crystal-clear Somali.
+   - Format answers cleanly with bold highlights and bullet points.
 """
 
 # ================= AUTH =================
@@ -179,7 +194,7 @@ async def generate_ai_image(req: ImageGenRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a world-class prompt engineer. Convert the user's prompt (Somali/Arabic/English) into an ultra-detailed, photorealistic, cinematic 8k English prompt for Flux/Midjourney. Return ONLY the prompt text, no quotes or explanation."
+                    "content": "You are a prompt engineer. Convert the user's prompt (Somali/Arabic/English) into an ultra-detailed, photorealistic, cinematic 8k English prompt for Flux. Return ONLY the prompt text, no quotes or explanation."
                 },
                 {
                     "role": "user",
@@ -205,7 +220,7 @@ async def generate_ai_image(req: ImageGenRequest):
         "image_url": image_url
     }
 
-# ================= 🚀 DEEP INTELLIGENCE CHAT (HIGH REASONING & ACCURACY) =================
+# ================= 🚀 CHAT WITH PRECISION ACCURACY =================
 @app.post("/api/chat")
 async def send_chat_message(req: ChatMessageRequest):
     user_msg = req.message.strip()
@@ -217,7 +232,6 @@ async def send_chat_message(req: ChatMessageRequest):
     valid_id = safe_object_id(req.chat_id)
     chat_id_str = str(valid_id) if valid_id else "temp_" + str(int(datetime.utcnow().timestamp()))
 
-    # 1. MongoDB Session lookup
     try:
         if valid_id:
             chat_doc = await chat_collection.find_one({"_id": valid_id, "email": user_email})
@@ -238,9 +252,9 @@ async def send_chat_message(req: ChatMessageRequest):
     except Exception as db_err:
         print(f"MongoDB Safe Mode: {db_err}")
 
-    # 2. Xusuusta Context-ka oo la ballaariyay (12-kii fariin ee u dambeeyay)
+    # Context Memory
     history_messages = chat_doc.get("messages", []) if chat_doc else []
-    context_window = history_messages[-12:]
+    context_window = history_messages[-10:]
 
     groq_messages = [{"role": "system", "content": system_prompt}]
     for msg in context_window:
@@ -248,17 +262,17 @@ async def send_chat_message(req: ChatMessageRequest):
             groq_messages.append({"role": msg["role"], "content": msg["content"]})
     groq_messages.append({"role": "user", "content": user_msg})
 
-    # 3. Wac Model-ka 70B (Deep Reasoning + Strict Accuracy)
     ai_response = None
     last_error = ""
 
+    # Wac Model-ka Llama 3.3 70B oo leh Temperature 0.3 (Strict Accuracy)
     for model_name in FRONTIER_MODELS:
         try:
             chat_completion = await groq_client.chat.completions.create(
                 messages=groq_messages,
                 model=model_name,
-                temperature=0.5,  # 🎯 0.5 = Dheelli-tirka ugu fiican ee caqliga & saxnaanta
-                max_tokens=4096,  # 🚀 Jawaab buuxda oo qoto dheer oo aan go'ayn
+                temperature=0.3, # 🎯 0.3 = Strict Factual Accuracy (Zero Guesswork)
+                max_tokens=3500,
                 top_p=0.9
             )
             ai_response = chat_completion.choices[0].message.content
@@ -271,7 +285,6 @@ async def send_chat_message(req: ChatMessageRequest):
     if not ai_response:
         ai_response = f"Waan ka xumahay, cilad farsamo ayaa dhacday: {last_error}"
 
-    # 4. Ku kaydi MongoDB
     try:
         if valid_id:
             now = datetime.utcnow()
@@ -363,7 +376,7 @@ async def extract_file_content(file: UploadFile = File(...)):
         extracted_text = ""
 
         if any(filename_lower.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp', '.bmp']):
-            extracted_text = f"[Image File Uploaded: {file.filename}] - Please analyze this image in detail and answer the user's question."
+            extracted_text = f"[Image File Uploaded: {file.filename}] - Please analyze this image in detail."
         elif filename_lower.endswith(".pdf"):
             if pypdf:
                 reader = pypdf.PdfReader(io.BytesIO(content_bytes))
