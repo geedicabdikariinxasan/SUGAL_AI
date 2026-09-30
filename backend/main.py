@@ -19,11 +19,11 @@ try:
 except ImportError:
     pypdf = None
 
-app = FastAPI(title="SUGAL AI - Super Intelligence Edition")
+app = FastAPI(title="SUGAL AI - Frontier Intelligence Edition")
 
 # MongoDB Atlas
 MONGO_DETAILS = "mongodb+srv://Haji:1122@cluster0.wcn5swm.mongodb.net/?appName=Cluster0"
-client = AsyncIOMotorClient(MONGO_DETAILS, serverSelectionTimeoutMS=3000)
+client = AsyncIOMotorClient(MONGO_DETAILS, serverSelectionTimeoutMS=4000)
 database = client.ai_chatbot_db
 user_collection = database.get_collection("users")
 chat_collection = database.get_collection("chats")
@@ -36,13 +36,12 @@ GROQ_API_KEY = os.getenv(
 
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
 
-# 🚀 1. MODEL-KA UGU CAQLIGA BADAN & KUWA FAST FALLBACK AH
-PRIMARY_MODEL = "llama-3.3-70b-versatile"
-BACKUP_MODELS = [
+# 🚀 MODEL-LADA UGU CAQLIGA BADAN EE HEER CAALAMI (GPT-4 TIER)
+FRONTIER_MODELS = [
     "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant",
     "qwen/qwen3.8-27b",
-    "openai/gpt-oss-20b"
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "llama-3.1-8b-instant"
 ]
 
 def safe_object_id(id_val):
@@ -91,25 +90,25 @@ class ProfileUpdateRequest(BaseModel):
     email: str
     fullName: str
 
-# 🧠 2. SYSTEM PROMPT-KA HEERKA SARE EE AQOONTA, LUQADAHA & XAQIIQADA
+# 🧠 SYSTEM PROMPT HEERKEEDU YAHAY FRONTIER AI (ChatGPT-4 & Claude Grade)
 system_prompt = """
-You are SUGAL AI, an omniscient, world-class, highly accurate, and polyglot AI assistant.
+You are SUGAL AI (Sirdoonka Macmalka ah ee SUGAL), a world-class, frontier-grade AI engine designed for maximum intellectual depth, precision, and native multilingual fluency.
 
-CRITICAL INSTRUCTIONS:
-1. FACTUAL ACCURACY & KNOWLEDGE:
-   - Provide 100% accurate, deeply reasoned, and factual answers across all domains: Somali History, World History, Science, Islam & Religion, Coding, Mathematics, Business, Medicine, and Technology.
-   - Never hallucinate, guess, or invent false information. If details are nuanced, explain them clearly with evidence.
-   - When writing code, provide clean, optimized, bug-free, and well-commented code.
+CORE OPERATIONAL PRINCIPLES:
+1. RIGOROUS KNOWLEDGE & FACTUAL ACCURACY:
+   - Provide comprehensive, deeply researched, and 100% factually accurate answers across all disciplines: Science, Technology, Programming, History (Somali & Global), Mathematics, Business, Medicine, and Islamic Studies.
+   - Never hallucinate, guess, or invent untrue information. Think critically through multi-step logic before answering.
+   - If a problem requires mathematics or coding, write robust, complete, production-ready, and well-explained solutions.
 
-2. NATIVE MULTILINGUAL PRECISION:
-   - Automatically detect the user's language and reply in that EXACT same language with native fluency.
-   - Somali: Use rich, expressive, grammatically flawless, professional, and authentic Somali (Af-Soomaali qani ah, sax ah oo xikmadaysan).
-   - Arabic: Use eloquent, grammatically sound Modern Standard Arabic (فصحى بليغة وسليمة).
-   - English: Use articulate, professional, and concise English.
+2. NATIVE MULTILINGUAL ELOQUENCE:
+   - Match the user's language automatically with absolute grammatical perfection and natural tone.
+   - Somali: Use rich, authentic, expressive, and grammatically flawless Somali (Af-Soomaali qoran oo sugan, qani ah, oo aan ahayn turjumaad qallafsan).
+   - Arabic: Use eloquent, grammatically sound Standard Arabic (فصحى بليغة ومحكمة).
+   - English: Use articulate, professional, and insightful English.
 
-3. STRUCTURE & CLARITY:
-   - Go straight to the point without unnecessary generic fluff.
-   - Format answers beautifully using bold keywords, clean bullet points, numbered steps, and markdown code blocks.
+3. STRUCTURED & HIGH-VALUE OUTPUTS:
+   - Structure responses with clear headings, bold takeaways, numbered logical steps, and clean markdown tables/code blocks.
+   - Avoid empty fluff or vague summaries; provide substantial, highly useful, and actionable insights.
 """
 
 # ================= AUTH =================
@@ -167,7 +166,7 @@ async def update_user_profile(req: ProfileUpdateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ================= 🎨 ULTRA-SMART AI IMAGE GENERATOR =================
+# ================= 🎨 AI IMAGE GENERATOR ENGINE =================
 @app.post("/api/generate-image")
 async def generate_ai_image(req: ImageGenRequest):
     user_prompt = req.prompt.strip()
@@ -180,7 +179,7 @@ async def generate_ai_image(req: ImageGenRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a prompt engineer. Convert the user's prompt (Somali/Arabic/English) into an ultra-detailed, photorealistic, cinematic 8k English prompt for Flux. Return ONLY the prompt text, no quotes or explanation."
+                    "content": "You are a world-class prompt engineer. Convert the user's prompt (Somali/Arabic/English) into an ultra-detailed, photorealistic, cinematic 8k English prompt for Flux/Midjourney. Return ONLY the prompt text, no quotes or explanation."
                 },
                 {
                     "role": "user",
@@ -188,7 +187,7 @@ async def generate_ai_image(req: ImageGenRequest):
                 }
             ],
             model="llama-3.3-70b-versatile",
-            max_tokens=85,
+            max_tokens=90,
             temperature=0.5
         )
         enhanced_prompt = completion.choices[0].message.content.strip().strip('"')
@@ -206,7 +205,7 @@ async def generate_ai_image(req: ImageGenRequest):
         "image_url": image_url
     }
 
-# ================= 🚀 FAST & INTELLIGENT CHAT (HIGH ACCURACY) =================
+# ================= 🚀 DEEP INTELLIGENCE CHAT (HIGH REASONING & ACCURACY) =================
 @app.post("/api/chat")
 async def send_chat_message(req: ChatMessageRequest):
     user_msg = req.message.strip()
@@ -224,7 +223,7 @@ async def send_chat_message(req: ChatMessageRequest):
             chat_doc = await chat_collection.find_one({"_id": valid_id, "email": user_email})
 
         if not chat_doc:
-            title = user_msg[:30] + ("..." if len(user_msg) > 30 else "")
+            title = user_msg[:32] + ("..." if len(user_msg) > 32 else "")
             new_chat = {
                 "email": user_email,
                 "title": title,
@@ -239,9 +238,9 @@ async def send_chat_message(req: ChatMessageRequest):
     except Exception as db_err:
         print(f"MongoDB Safe Mode: {db_err}")
 
-    # 2. Context Memory (6-dii fariin ee u dambeeyay)
+    # 2. Xusuusta Context-ka oo la ballaariyay (12-kii fariin ee u dambeeyay)
     history_messages = chat_doc.get("messages", []) if chat_doc else []
-    context_window = history_messages[-6:]
+    context_window = history_messages[-12:]
 
     groq_messages = [{"role": "system", "content": system_prompt}]
     for msg in context_window:
@@ -249,17 +248,18 @@ async def send_chat_message(req: ChatMessageRequest):
             groq_messages.append({"role": msg["role"], "content": msg["content"]})
     groq_messages.append({"role": "user", "content": user_msg})
 
-    # 3. Wac Model-ka 70B oo leh Temperature 0.4 (Strict Accuracy & Speed)
+    # 3. Wac Model-ka 70B (Deep Reasoning + Strict Accuracy)
     ai_response = None
     last_error = ""
 
-    for model_name in BACKUP_MODELS:
+    for model_name in FRONTIER_MODELS:
         try:
             chat_completion = await groq_client.chat.completions.create(
                 messages=groq_messages,
                 model=model_name,
-                temperature=0.4,  # 🎯 0.4 = Saxnaan aad u sarreysa oo aan khaladaad lahayn
-                max_tokens=2048,  # Jawaab buuxda oo mufasal ah
+                temperature=0.5,  # 🎯 0.5 = Dheelli-tirka ugu fiican ee caqliga & saxnaanta
+                max_tokens=4096,  # 🚀 Jawaab buuxda oo qoto dheer oo aan go'ayn
+                top_p=0.9
             )
             ai_response = chat_completion.choices[0].message.content
             if ai_response:
@@ -363,7 +363,7 @@ async def extract_file_content(file: UploadFile = File(...)):
         extracted_text = ""
 
         if any(filename_lower.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp', '.bmp']):
-            extracted_text = f"[Image File Uploaded: {file.filename}] - Please analyze this image and answer the user query."
+            extracted_text = f"[Image File Uploaded: {file.filename}] - Please analyze this image in detail and answer the user's question."
         elif filename_lower.endswith(".pdf"):
             if pypdf:
                 reader = pypdf.PdfReader(io.BytesIO(content_bytes))
