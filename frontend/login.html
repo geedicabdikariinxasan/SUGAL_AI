@@ -50,7 +50,7 @@
 
         /* Glass Card */
         .login-card {
-            background: rgba(3, 18, 65, .78);
+            background: rgba(3, 18, 65, .82);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(14, 165, 255, .35);
@@ -63,15 +63,30 @@
             box-shadow: 0 0 25px rgba(0, 210, 255, .3);
         }
 
-        /* Inputs */
+        /* ✍️ 1. INPUT BOX-KA OO LA NADIIFIYAY */
         .input-box {
-            background: rgba(2, 20, 60, .8);
-            border: 1px solid rgba(70, 150, 255, .3);
+            background: rgba(2, 20, 60, .85) !important;
+            border: 1px solid rgba(70, 150, 255, .35);
             transition: all .25s ease;
         }
         .input-box:focus-within {
             border-color: #00d9ff;
-            box-shadow: 0 0 20px rgba(0, 217, 255, .2);
+            box-shadow: 0 0 20px rgba(0, 217, 255, .25);
+        }
+        .input-box input {
+            background: transparent !important;
+            color: white !important;
+            outline: none !important;
+        }
+
+        /* KA SAAR SANDUUQA CAD EE CHROME AUTOFILL */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #02143c inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
 
         /* Login Button */
@@ -107,7 +122,6 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* Feature hover */
         .feature-badge { transition: .2s; }
         .feature-badge:hover { transform: translateY(-3px); }
     </style>
@@ -138,7 +152,7 @@
     <!-- MAIN CONTAINER -->
     <main class="flex-1 flex items-center justify-center px-4 py-4 sm:py-8 relative z-10">
 
-        <!-- DESKTOP LEFT ROBOT & INFO DECORATION (Hidden on Mobile) -->
+        <!-- DESKTOP LEFT ROBOT (Hidden on Mobile) -->
         <div class="hidden xl:flex absolute left-12 bottom-12 w-[340px] flex-col items-center">
             
             <div class="robot relative">
@@ -175,7 +189,7 @@
             </div>
         </div>
 
-        <!-- 🚀 GLASS LOGIN CARD (100% RESPONSIVE & MOBILE-FRIENDLY) -->
+        <!-- 🚀 GLASS LOGIN CARD -->
         <section class="login-card w-full max-w-[460px] rounded-3xl p-6 sm:p-8 mx-auto">
 
             <!-- LOGO & BRAND -->
@@ -202,29 +216,29 @@
             </div>
 
             <!-- FORM -->
-            <form id="loginForm" class="space-y-3.5">
+            <form id="loginForm" class="space-y-4">
 
                 <!-- EMAIL -->
-                <div class="input-box rounded-2xl h-12 sm:h-13 flex items-center px-4 gap-3">
+                <div class="input-box rounded-2xl h-12 sm:h-14 flex items-center px-4 gap-3">
                     <span class="text-base sm:text-lg text-cyan-400">✉</span>
                     <input
                         id="email"
                         type="email"
                         placeholder="Email address"
-                        class="w-full text-xs sm:text-sm text-white placeholder:text-slate-500 bg-transparent outline-none"
+                        class="w-full text-sm sm:text-base text-white placeholder:text-slate-500 bg-transparent outline-none"
                         required
                         autocomplete="email"
                     >
                 </div>
 
                 <!-- PASSWORD -->
-                <div class="input-box rounded-2xl h-12 sm:h-13 flex items-center px-4 gap-3">
+                <div class="input-box rounded-2xl h-12 sm:h-14 flex items-center px-4 gap-3">
                     <span class="text-base sm:text-lg text-cyan-400">🔒</span>
                     <input
                         id="password"
                         type="password"
                         placeholder="Password"
-                        class="w-full text-xs sm:text-sm text-white placeholder:text-slate-500 bg-transparent outline-none"
+                        class="w-full text-sm sm:text-base text-white placeholder:text-slate-500 bg-transparent outline-none"
                         required
                         autocomplete="current-password"
                     >
@@ -239,12 +253,12 @@
                 </div>
 
                 <!-- REMEMBER & FORGOT -->
-                <div class="flex items-center justify-between text-xs pt-0.5">
+                <div class="flex items-center justify-between text-xs sm:text-sm pt-1">
                     <label class="flex items-center gap-2 text-slate-400 cursor-pointer select-none">
-                        <input type="checkbox" id="rememberMe" class="accent-cyan-400 rounded">
+                        <input type="checkbox" id="rememberMe" class="accent-cyan-400 rounded w-4 h-4">
                         Remember me
                     </label>
-                    <a href="javascript:void(0)" onclick="showToast('Password reset feature coming soon!')" class="text-cyan-400 hover:text-cyan-300 font-medium">
+                    <a href="javascript:void(0)" onclick="showToast('Password reset feature coming soon!')" class="text-cyan-400 hover:text-cyan-300 font-semibold">
                         Forgot password?
                     </a>
                 </div>
@@ -253,46 +267,21 @@
                 <button
                     type="submit"
                     id="submitBtn"
-                    class="login-btn w-full h-12 sm:h-13 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 text-white shadow-lg mt-2 cursor-pointer"
+                    class="login-btn w-full h-12 sm:h-14 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 text-white shadow-lg mt-3 cursor-pointer"
                 >
                     <span id="btnText">→ &nbsp; Login</span>
                 </button>
 
             </form>
 
-            <!-- DIVIDER -->
-            <div class="flex items-center gap-3 my-5">
-                <div class="h-px bg-white/10 flex-1"></div>
-                <span class="text-[11px] text-slate-500">Or continue with</span>
-                <div class="h-px bg-white/10 flex-1"></div>
-            </div>
-
-            <!-- SOCIAL BUTTONS -->
-            <div class="grid grid-cols-2 gap-3">
-                <button
-                    type="button"
-                    onclick="showToast('Google login is connecting...')"
-                    class="h-10 sm:h-11 rounded-xl border border-white/10 bg-white/[.04] hover:bg-white/[.08] transition flex items-center justify-center gap-2 text-xs font-medium text-slate-300 active:scale-98"
-                >
-                    <span class="text-red-400 font-bold text-sm">G</span> Google
-                </button>
-                <button
-                    type="button"
-                    onclick="showToast('Microsoft login is connecting...')"
-                    class="h-10 sm:h-11 rounded-xl border border-white/10 bg-white/[.04] hover:bg-white/[.08] transition flex items-center justify-center gap-2 text-xs font-medium text-slate-300 active:scale-98"
-                >
-                    <span class="text-blue-400 text-sm">▦</span> Microsoft
-                </button>
-            </div>
-
-            <!-- REGISTER BUTTON -->
-            <div class="text-center mt-5 pt-1">
-                <p class="text-xs text-slate-400 mb-2.5">Don't have an account?</p>
+            <!-- REGISTER BUTTON (TOOS AH OO BILAA GOOGLE/MICROSOFT AH) -->
+            <div class="text-center mt-6 pt-2 border-t border-white/10">
+                <p class="text-xs sm:text-sm text-slate-400 mb-3">Don't have an account?</p>
                 <button
                     type="button"
                     id="registerBtn"
                     onclick="window.location.href='register.html'"
-                    class="register-btn w-full h-11 sm:h-12 rounded-xl text-cyan-300 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    class="register-btn w-full h-11 sm:h-12 rounded-xl text-cyan-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
                 >
                     <span>👤 Register</span>
                     <span>→</span>
@@ -318,7 +307,7 @@
         <span id="toastMsg">Message</span>
     </div>
 
-    <!-- JAVASCRIPT CONNECTED TO FASTAPI BACKEND -->
+    <!-- JAVASCRIPT CONNECTED TO BACKEND -->
     <script>
         // ================= SHOW / HIDE PASSWORD =================
         const passwordInput = document.getElementById("password");
@@ -383,7 +372,6 @@
                     return;
                 }
 
-                // Loading State
                 if (submitBtn) submitBtn.disabled = true;
                 if (btnText) btnText.innerHTML = `<span class="animate-pulse">Galayaa... ⏳</span>`;
 
@@ -397,14 +385,12 @@
                     const data = await response.json();
 
                     if (response.ok && data.status === "success") {
-                        // 🚀 Keydi session-ka qofka
                         localStorage.setItem("user", JSON.stringify(data.user));
                         showToast("Si guul leh ayaad u soo gashay!", "success");
 
-                        // Toos ugu gudub Dashboard-ka
                         setTimeout(() => {
                             window.location.href = "/dashboard.html";
-                        }, 500);
+                        }, 400);
                     } else {
                         showToast(data.detail || "Email-ka ama Password-ka waa khalad!", "error");
                         resetButton();

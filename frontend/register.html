@@ -1,418 +1,477 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot - Create Account</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SUGAL AI - Register</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aiBlue: "#0ea5ff",
+                        aiPurple: "#8b5cf6",
+                        dark: "#020617"
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #020617;
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            min-height: 100dvh;
         }
 
-        .left-panel {
-            background:
-                radial-gradient(circle at 20% 80%, rgba(30, 100, 255, 0.35), transparent 35%),
-                linear-gradient(145deg, #06235c, #071b4a 55%, #020e2d);
+        /* Animated Glowing Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            pointer-events: none;
+            opacity: .30;
+            z-index: 1;
         }
 
-        .robot-float {
-            animation: floating 3s ease-in-out infinite;
+        .orb-one { width: 420px; height: 420px; background: #0758ff; top: -180px; left: -120px; }
+        .orb-two { width: 420px; height: 420px; background: #7028d9; right: -150px; top: 25%; }
+        .orb-three { width: 300px; height: 300px; background: #00d9ff; bottom: -150px; left: 35%; }
+
+        /* Background Waves */
+        .wave {
+            position: fixed;
+            width: 800px;
+            height: 250px;
+            border-radius: 50%;
+            border-top: 1px solid rgba(0, 217, 255, .12);
+            pointer-events: none;
+        }
+        .wave-one { left: -350px; top: 25%; transform: rotate(-18deg); }
+        .wave-two { right: -350px; bottom: 15%; transform: rotate(18deg); }
+
+        /* Glass Card */
+        .register-card {
+            background: rgba(3, 18, 65, .82);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(14, 165, 255, .35);
+            box-shadow: 0 0 70px rgba(0, 140, 255, .15), inset 0 0 35px rgba(0, 100, 255, .04);
         }
 
+        /* Logo */
+        .logo-box {
+            background: linear-gradient(135deg, #ffffff, #9deeff);
+            box-shadow: 0 0 30px rgba(0, 210, 255, .25);
+        }
+
+        /* Clean Input Box */
+        .input-box {
+            background: rgba(2, 20, 60, .85) !important;
+            border: 1px solid rgba(70, 150, 255, .35);
+            transition: all .25s ease;
+        }
+        .input-box:focus-within {
+            border-color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, .25);
+        }
+        .input-box input {
+            background: transparent !important;
+            color: white !important;
+            outline: none !important;
+        }
+
+        /* Autofill Clean Fix */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #02143c inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        /* Buttons */
+        .register-main-btn {
+            background: linear-gradient(100deg, #087cff, #286eff, #8b3dff);
+            transition: all .25s ease;
+        }
+        .register-main-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(20, 110, 255, .30);
+        }
+        .register-main-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn {
+            border: 1px solid rgba(0, 217, 255, .45);
+            background: rgba(0, 130, 255, .07);
+            transition: all .25s ease;
+        }
+        .login-btn:hover {
+            background: rgba(0, 150, 255, .15);
+            border-color: #00d9ff;
+        }
+
+        /* Floating Robot Animation */
+        .robot {
+            animation: floating 4s ease-in-out infinite;
+        }
         @keyframes floating {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-
-        .robot-head {
-            width: 120px;
-            height: 85px;
-            background: linear-gradient(145deg, #ffffff, #dcecff);
-            border-radius: 32px;
-            box-shadow: 0 15px 35px rgba(0, 100, 255, 0.3);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .robot-face {
-            width: 85px;
-            height: 50px;
-            background: #071d50;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            box-shadow: inset 0 0 15px rgba(0, 140, 255, 0.3);
-        }
-
-        .robot-eye {
-            width: 10px;
-            height: 10px;
-            background: #54d8ff;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #54d8ff;
-        }
-
-        .robot-antenna {
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 5px;
-            height: 24px;
-            background: #51a9ff;
-            border-radius: 10px;
-        }
-
-        .robot-light {
-            position: absolute;
-            top: -32px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #4eb8ff;
-            box-shadow: 0 0 15px #4eb8ff;
-        }
-
-        .chat-bubble {
-            animation: bubbleFloat 4s ease-in-out infinite;
-        }
-
-        @keyframes bubbleFloat {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        .input-focus:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
-            outline: none;
-        }
-
-        .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @media(max-width: 900px) {
-            .left-panel {
-                display: none;
-            }
-
-            .register-container {
-                width: 100%;
-            }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
 
-<body class="h-screen w-screen overflow-hidden m-0 p-0 bg-[#f8faff]">
+<body class="flex flex-col justify-between relative selection:bg-cyan-500 selection:text-white">
 
-    <div class="h-full w-full flex flex-col lg:flex-row overflow-hidden">
+    <!-- BACKGROUND -->
+    <div class="orb orb-one"></div>
+    <div class="orb orb-two"></div>
+    <div class="orb orb-three"></div>
 
-        <!-- ================================================= -->
-        <!-- LEFT SIDE -->
-        <!-- ================================================= -->
-        <section class="left-panel lg:w-1/2 h-full text-white relative overflow-hidden flex flex-col justify-between p-6 lg:p-10">
+    <div class="wave wave-one"></div>
+    <div class="wave wave-two"></div>
 
-            <!-- Logo -->
-            <div class="flex items-center justify-between">
+    <!-- TOP BAR -->
+    <header class="w-full flex items-center justify-between px-6 py-5 relative z-20">
+        <div class="flex items-center gap-2">
+            <span class="text-xl">🤖</span>
+            <span class="font-extrabold text-sm tracking-wider text-slate-200">SUGAL <span class="text-cyan-400">AI</span></span>
+        </div>
+        <div class="text-xs text-slate-400 hidden sm:flex items-center gap-3">
+            <span>Smarter</span>
+            <span class="text-cyan-400">•</span>
+            <span>Faster</span>
+            <span class="text-purple-400">•</span>
+            <span>Better</span>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="flex-1 flex items-center justify-center px-4 py-4 sm:py-8 relative z-10">
+
+        <!-- DESKTOP LEFT ROBOT & INFO (Hidden on Mobile) -->
+        <div class="desktop-ai hidden xl:flex absolute left-12 top-1/2 -translate-y-1/2 w-[320px] flex-col items-center">
+            
+            <div class="robot relative">
+                <div class="absolute inset-0 bg-cyan-400/20 blur-3xl rounded-full"></div>
+                <div class="relative w-48 h-36 rounded-[42%] bg-gradient-to-br from-white to-cyan-200 border-4 border-cyan-300 shadow-[0_0_45px_rgba(0,210,255,.45)] flex items-center justify-center">
+                    <div class="w-36 h-20 rounded-[35%] bg-slate-950 border-2 border-cyan-400 flex items-center justify-center gap-6 shadow-[0_0_25px_rgba(0,217,255,.35)]">
+                        <span class="text-cyan-300 text-3xl font-bold">◡</span>
+                        <span class="text-cyan-300 text-3xl font-bold">◡</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-black mt-6">
+                Join <span class="text-cyan-400">SUGAL AI</span>
+            </h3>
+
+            <p class="text-center text-slate-400 text-xs sm:text-sm leading-6 mt-2 max-w-xs">
+                Create your account and unlock powerful AI tools for your daily tasks.
+            </p>
+
+            <div class="flex gap-3 mt-6">
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-lg">💬</div>
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-400/20 flex items-center justify-center text-xs font-bold text-blue-300">&lt;/&gt;</div>
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-400/20 flex items-center justify-center text-lg">✦</div>
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-lg">📄</div>
+            </div>
+        </div>
+
+        <!-- 🚀 REGISTER GLASS CARD -->
+        <section class="register-card w-full max-w-[460px] rounded-3xl p-6 sm:p-8 mx-auto">
+
+            <!-- LOGO -->
+            <div class="flex justify-center mb-5">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
-                        <div class="w-7 h-5 rounded-lg bg-blue-500 relative">
-                            <span class="absolute left-1.5 top-1.5 w-1.5 h-1.5 bg-white rounded-full"></span>
-                            <span class="absolute right-1.5 top-1.5 w-1.5 h-1.5 bg-white rounded-full"></span>
-                        </div>
+                    <div class="logo-box w-12 h-12 rounded-2xl flex items-center justify-center text-2xl">
+                        🤖
                     </div>
-
                     <div>
-                        <h1 class="text-2xl font-bold leading-none">
-                            AI <span class="text-blue-400">Chatbot</span>
+                        <h1 class="text-xl sm:text-2xl font-black leading-none">
+                            SUGAL <span class="text-cyan-400">AI</span>
                         </h1>
-                        <p class="text-xs text-blue-200 mt-0.5">Your Smart Assistant</p>
+                        <p class="text-[11px] text-slate-300 mt-0.5">Your Smart Assistant</p>
                     </div>
                 </div>
-
-                <p class="text-xs text-blue-200 hidden lg:block">
-                    Smarter Conversations <span class="mx-1">•</span> Better Tomorrow
-                </p>
             </div>
 
-            <!-- Left Content -->
-            <div class="max-w-md my-auto">
-                <h2 class="text-3xl lg:text-4xl font-bold leading-tight">
-                    Create Your
-                    <span class="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400">
-                        AI Account
-                    </span>
+            <!-- TITLE -->
+            <div class="text-center mb-5">
+                <h2 class="text-2xl sm:text-3xl font-black">
+                    Create <span class="text-cyan-400">Account</span>
                 </h2>
-
-                <p class="mt-3 text-sm text-blue-100 leading-relaxed">
-                    Join our AI-powered platform and start asking questions, learning, creating, and becoming more productive.
-                </p>
-
-                <!-- Features -->
-                <div class="grid grid-cols-2 gap-3 mt-6 text-xs">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/20 flex items-center justify-center">
-                            <i data-lucide="zap" class="w-4 h-4 text-cyan-300"></i>
-                        </div>
-                        <span class="text-blue-100">Instant Answers</span>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/20 flex items-center justify-center">
-                            <i data-lucide="file-text" class="w-4 h-4 text-cyan-300"></i>
-                        </div>
-                        <span class="text-blue-100">Upload Files & PDFs</span>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/20 flex items-center justify-center">
-                            <i data-lucide="mic" class="w-4 h-4 text-cyan-300"></i>
-                        </div>
-                        <span class="text-blue-100">Voice Interaction</span>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/20 flex items-center justify-center">
-                            <i data-lucide="history" class="w-4 h-4 text-cyan-300"></i>
-                        </div>
-                        <span class="text-blue-100">Chat History</span>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/20 flex items-center justify-center">
-                            <i data-lucide="languages" class="w-4 h-4 text-cyan-300"></i>
-                        </div>
-                        <span class="text-blue-100">Multi-Language</span>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/20 flex items-center justify-center">
-                            <i data-lucide="shield-check" class="w-4 h-4 text-cyan-300"></i>
-                        </div>
-                        <span class="text-blue-100">Secure & Private</span>
-                    </div>
-                </div>
-
-                <!-- Robot -->
-                <div class="relative mt-6 flex items-end gap-6">
-                    <div class="robot-float relative">
-                        <div class="robot-antenna"></div>
-                        <div class="robot-light"></div>
-                        <div class="robot-head">
-                            <div class="robot-face">
-                                <span class="robot-eye"></span>
-                                <span class="robot-eye"></span>
-                            </div>
-                        </div>
-                        <div class="w-20 h-14 bg-gradient-to-br from-white to-blue-100 rounded-t-[30px] mx-auto -mt-1"></div>
-                    </div>
-
-                    <div class="chat-bubble bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl px-4 py-2.5 mb-6 shadow-lg text-xs">
-                        <p class="font-semibold">Welcome! 👋</p>
-                        <p class="text-blue-100 mt-0.5">Let's build something great together.</p>
-                    </div>
-                </div>
+                <p class="text-slate-400 text-xs mt-1">Join SUGAL AI and start your AI journey</p>
             </div>
 
-            <div class="h-2"></div>
-        </section>
+            <!-- FORM -->
+            <form id="registerForm" class="space-y-3.5">
 
-        <!-- ================================================= -->
-        <!-- RIGHT SIDE -->
-        <!-- ================================================= -->
-        <section class="register-container lg:w-1/2 h-full bg-white relative flex items-center justify-center p-6 lg:p-8 overflow-y-auto">
+                <!-- FULL NAME -->
+                <div class="input-box rounded-2xl h-12 sm:h-13 flex items-center px-4 gap-3">
+                    <span class="text-base text-cyan-400">👤</span>
+                    <input
+                        id="fullName"
+                        type="text"
+                        placeholder="Full name"
+                        class="w-full text-xs sm:text-sm text-white placeholder:text-slate-500 bg-transparent outline-none"
+                        required
+                        autocomplete="name"
+                    >
+                </div>
 
-            <!-- Language -->
-            <div class="absolute top-4 right-6">
-                <button class="flex items-center gap-2 border border-gray-200 rounded-full px-3.5 py-1.5 text-xs text-gray-700 bg-white hover:bg-gray-50">
-                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
-                    <span>English</span>
-                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                <!-- EMAIL -->
+                <div class="input-box rounded-2xl h-12 sm:h-13 flex items-center px-4 gap-3">
+                    <span class="text-base text-cyan-400">✉</span>
+                    <input
+                        id="email"
+                        type="email"
+                        placeholder="Email address"
+                        class="w-full text-xs sm:text-sm text-white placeholder:text-slate-500 bg-transparent outline-none"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="input-box rounded-2xl h-12 sm:h-13 flex items-center px-4 gap-3">
+                    <span class="text-base text-cyan-400">🔒</span>
+                    <input
+                        id="password"
+                        type="password"
+                        placeholder="Create password"
+                        class="w-full text-xs sm:text-sm text-white placeholder:text-slate-500 bg-transparent outline-none"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <button
+                        type="button"
+                        id="showPassword"
+                        class="text-slate-400 hover:text-white text-base focus:outline-none"
+                        title="Toggle password visibility"
+                    >
+                        👁
+                    </button>
+                </div>
+
+                <!-- CONFIRM PASSWORD -->
+                <div class="input-box rounded-2xl h-12 sm:h-13 flex items-center px-4 gap-3">
+                    <span class="text-base text-cyan-400">🔐</span>
+                    <input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="Confirm password"
+                        class="w-full text-xs sm:text-sm text-white placeholder:text-slate-500 bg-transparent outline-none"
+                        required
+                        autocomplete="new-password"
+                    >
+                </div>
+
+                <!-- TERMS & CONDITIONS -->
+                <label class="flex items-start gap-2 text-xs text-slate-400 pt-1 cursor-pointer select-none">
+                    <input
+                        id="terms"
+                        type="checkbox"
+                        class="mt-0.5 accent-cyan-400 rounded w-3.5 h-3.5"
+                        required
+                    >
+                    <span>
+                        I agree to the
+                        <a href="javascript:void(0)" class="text-cyan-400 hover:underline">Terms</a>
+                        and
+                        <a href="javascript:void(0)" class="text-cyan-400 hover:underline">Privacy Policy</a>
+                    </span>
+                </label>
+
+                <!-- REGISTER BUTTON -->
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="register-main-btn w-full h-12 sm:h-13 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 text-white shadow-lg mt-2 cursor-pointer active:scale-98"
+                >
+                    <span id="btnText">Create Account &nbsp; →</span>
+                </button>
+
+            </form>
+
+            <!-- LOGIN REDIRECT LINK -->
+            <div class="text-center mt-5 pt-2 border-t border-white/10">
+                <p class="text-xs text-slate-400 mb-2.5">Already have an account?</p>
+                <button
+                    id="loginBtn"
+                    type="button"
+                    onclick="window.location.href='login.html'"
+                    class="login-btn w-full h-11 sm:h-12 rounded-xl text-cyan-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                    <span>← &nbsp; Login to SUGAL AI</span>
                 </button>
             </div>
 
-            <!-- Register Box -->
-            <div class="w-full max-w-md my-auto">
-
-                <!-- Robot icon -->
-                <div class="flex justify-center mb-3">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center shadow-sm">
-                        <div class="w-10 h-7 bg-[#071d50] rounded-xl relative flex items-center justify-center gap-2">
-                            <span class="w-1.5 h-1.5 bg-cyan-300 rounded-full shadow-[0_0_8px_#67e8f9]"></span>
-                            <span class="w-1.5 h-1.5 bg-cyan-300 rounded-full shadow-[0_0_8px_#67e8f9]"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Title -->
-                <div class="text-center mb-4">
-                    <h2 class="text-2xl font-bold text-[#08245a]">
-                        Create Account
-                    </h2>
-                    <p class="text-gray-500 text-xs mt-1">
-                        Join us today and start your AI journey
-                    </p>
-                </div>
-
-                <!-- Alert Message -->
-                <div id="messageBox" class="hidden mb-3 rounded-xl px-3 py-2 text-xs"></div>
-
-                <!-- FORM -->
-                <form id="registerForm" class="space-y-3">
-
-                    <!-- Full Name -->
-                    <div>
-                        <label for="fullName" class="block text-xs font-semibold text-[#172b4d] mb-1">
-                            Full Name
-                        </label>
-                        <div class="relative">
-                            <i data-lucide="user" class="absolute left-3.5 top-3 text-gray-400 w-4 h-4"></i>
-                            <input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Enter your full name" class="input-focus w-full border border-gray-200 rounded-xl py-2.5 pl-10 pr-3 text-xs text-gray-700 transition" required>
-                        </div>
-                    </div>
-
-                    <!-- Email -->
-                    <div>
-                        <label for="email" class="block text-xs font-semibold text-[#172b4d] mb-1">
-                            Email Address
-                        </label>
-                        <div class="relative">
-                            <i data-lucide="mail" class="absolute left-3.5 top-3 text-gray-400 w-4 h-4"></i>
-                            <input id="email" name="email" type="email" autocomplete="email" placeholder="Enter your email address" class="input-focus w-full border border-gray-200 rounded-xl py-2.5 pl-10 pr-3 text-xs text-gray-700 transition" required>
-                        </div>
-                    </div>
-
-                    <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-xs font-semibold text-[#172b4d] mb-1">
-                            Password
-                        </label>
-                        <div class="relative">
-                            <i data-lucide="lock" class="absolute left-3.5 top-3 text-gray-400 w-4 h-4"></i>
-                            <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Create a password" class="input-focus w-full border border-gray-200 rounded-xl py-2.5 pl-10 pr-10 text-xs text-gray-700 transition" required>
-                            <button type="button" onclick="togglePassword('password','passwordIcon')" class="absolute right-3.5 top-3 text-gray-400 hover:text-blue-600">
-                                <i id="passwordIcon" data-lucide="eye-off" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div>
-                        <label for="confirmPassword" class="block text-xs font-semibold text-[#172b4d] mb-1">
-                            Confirm Password
-                        </label>
-                        <div class="relative">
-                            <i data-lucide="lock-keyhole" class="absolute left-3.5 top-3 text-gray-400 w-4 h-4"></i>
-                            <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm your password" class="input-focus w-full border border-gray-200 rounded-xl py-2.5 pl-10 pr-10 text-xs text-gray-700 transition" required>
-                            <button type="button" onclick="togglePassword('confirmPassword','confirmIcon')" class="absolute right-3.5 top-3 text-gray-400 hover:text-blue-600">
-                                <i id="confirmIcon" data-lucide="eye-off" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Terms -->
-                    <div class="flex items-start gap-2">
-                        <input id="terms" type="checkbox" class="mt-0.5 w-3.5 h-3.5 accent-blue-600 rounded" required>
-                        <label for="terms" class="text-xs text-gray-500">
-                            I agree to the <a href="#" class="text-blue-600 font-medium hover:underline">Terms & Conditions</a> and <a href="#" class="text-blue-600 font-medium hover:underline">Privacy Policy</a>
-                        </label>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button id="registerButton" type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-2.5 rounded-xl shadow-md shadow-blue-200 transition flex items-center justify-center gap-2 text-xs">
-                        <span id="buttonText">Create Account</span>
-                        <i id="buttonArrow" data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </button>
-                </form>
-
-                <!-- Divider -->
-                <div class="flex items-center gap-3 my-3">
-                    <div class="h-px bg-gray-200 flex-1"></div>
-                    <span class="text-xs text-gray-400">Or continue with</span>
-                    <div class="h-px bg-gray-200 flex-1"></div>
-                </div>
-
-                <!-- Social Buttons -->
-                <div class="space-y-2">
-                    <button type="button" onclick="socialRegister('Google')" class="w-full border border-gray-200 rounded-xl py-2 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-xs">
-                        <span class="font-bold text-red-500">G</span>
-                        <span class="font-medium text-gray-700">Continue with Google</span>
-                    </button>
-
-                    <button type="button" onclick="socialRegister('Microsoft')" class="w-full border border-gray-200 rounded-xl py-2 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-xs">
-                        <div class="grid grid-cols-2 gap-0.5">
-                            <span class="w-2 h-2 bg-red-500"></span>
-                            <span class="w-2 h-2 bg-green-500"></span>
-                            <span class="w-2 h-2 bg-blue-500"></span>
-                            <span class="w-2 h-2 bg-yellow-500"></span>
-                        </div>
-                        <span class="font-medium text-gray-700">Continue with Microsoft</span>
-                    </button>
-                </div>
-
-                <!-- Bottom Link ee ku jira register.html -->
-<p class="text-center text-xs text-gray-500 mt-4">
-    Already have an account? 
-    <a href="login.html" class="text-blue-600 font-semibold hover:underline">
-        Login
-    </a>
-</p>
-
+            <!-- SECURITY FOOTER -->
+            <div class="flex justify-center items-center gap-1.5 mt-5 text-slate-500 text-[10px] sm:text-[11px]">
+                <span class="text-cyan-400">🛡</span>
+                <span>Your information is protected and secure.</span>
             </div>
+
         </section>
 
+    </main>
+
+    <!-- BOTTOM TOAST NOTIFICATION -->
+    <div
+        id="toast"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#06183d] border border-cyan-400/40 text-white text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2 backdrop-blur-md"
+    >
+        <span id="toastIcon">💡</span>
+        <span id="toastMsg">Message</span>
     </div>
 
-    <!-- JavaScript File -->
-    <script src="register.js"></script>
+    <!-- JAVASCRIPT CONNECTED TO FASTAPI BACKEND -->
     <script>
-        lucide.createIcons();
+        // ================= SHOW / HIDE PASSWORD =================
+        const passwordInput = document.getElementById("password");
+        const confirmPasswordInput = document.getElementById("confirmPassword");
+        const showPasswordBtn = document.getElementById("showPassword");
+
+        if (showPasswordBtn && passwordInput) {
+            showPasswordBtn.addEventListener("click", () => {
+                const isPassword = passwordInput.type === "password";
+                passwordInput.type = isPassword ? "text" : "password";
+                if (confirmPasswordInput) confirmPasswordInput.type = isPassword ? "text" : "password";
+                showPasswordBtn.textContent = isPassword ? "🙈" : "👁";
+            });
+        }
+
+        // ================= TOAST NOTIFICATIONS =================
+        const toast = document.getElementById("toast");
+        const toastMsg = document.getElementById("toastMsg");
+        const toastIcon = document.getElementById("toastIcon");
+        let toastTimeout = null;
+
+        function showToast(message, type = "info") {
+            if (!toast || !toastMsg) return;
+
+            toastMsg.textContent = message;
+            toastIcon.textContent = type === "error" ? "❌" : (type === "success" ? "✅" : "💡");
+
+            toast.classList.remove("opacity-0", "pointer-events-none");
+            toast.classList.add("opacity-100");
+
+            if (type === "error") {
+                toast.classList.add("border-red-500/50", "text-red-200");
+                toast.classList.remove("border-cyan-400/40", "text-white");
+            } else {
+                toast.classList.remove("border-red-500/50", "text-red-200");
+                toast.classList.add("border-cyan-400/40", "text-white");
+            }
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove("opacity-100");
+                toast.classList.add("opacity-0", "pointer-events-none");
+            }, 3000);
+        }
+
+        // ================= FASTAPI REGISTER INTEGRATION =================
+        const registerForm = document.getElementById("registerForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const btnText = document.getElementById("btnText");
+
+        if (registerForm) {
+            registerForm.addEventListener("submit", async function(e) {
+                e.preventDefault();
+
+                const fullName = document.getElementById("fullName").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const password = document.getElementById("password").value.trim();
+                const confirmPassword = document.getElementById("confirmPassword").value.trim();
+                const termsChecked = document.getElementById("terms").checked;
+
+                if (!fullName || !email || !password || !confirmPassword) {
+                    showToast("Fadlan buuxi dhammaan meelaha banaan.", "error");
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    showToast("Labada password isma laha! Fadlan hubi.", "error");
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showToast("Password-ku waa inuu ka koobnaadaa ugu yaraan 6 xaraf.", "error");
+                    return;
+                }
+
+                if (!termsChecked) {
+                    showToast("Fadlan ogolow shuruudaha (Terms).", "error");
+                    return;
+                }
+
+                // Loading State
+                if (submitBtn) submitBtn.disabled = true;
+                if (btnText) btnText.innerHTML = `<span class="animate-pulse">Abuurayaa Account... ⏳</span>`;
+
+                try {
+                    // 1. Diiwaangeli isticmaalaha
+                    const res = await fetch("/api/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ fullName, email, password })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok && data.status === "success") {
+                        showToast("Account-kaaga waa la sameeyay! Galayaa...", "success");
+
+                        // 2. Toos u Login garee
+                        const loginRes = await fetch("/api/login", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email, password })
+                        });
+
+                        const loginData = await loginRes.json();
+
+                        if (loginRes.ok && loginData.status === "success") {
+                            localStorage.setItem("user", JSON.stringify(loginData.user));
+                            
+                            setTimeout(() => {
+                                window.location.href = "/dashboard.html";
+                            }, 500);
+                        } else {
+                            window.location.href = "/login.html";
+                        }
+                    } else {
+                        showToast(data.detail || "Diiwaangelintu kuma guuleysan!", "error");
+                        resetButton();
+                    }
+                } catch (err) {
+                    console.error("Register Error:", err);
+                    showToast("Server-ka laguma xiri karin! Hubi internet-kaaga.", "error");
+                    resetButton();
+                }
+            });
+        }
+
+        function resetButton() {
+            if (submitBtn) submitBtn.disabled = false;
+            if (btnText) btnText.innerHTML = `Create Account &nbsp; →`;
+        }
     </script>
 </body>
-
 </html>
