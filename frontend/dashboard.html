@@ -8,10 +8,18 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- 🚀 1. PWA APP SETTINGS & ICONS -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#03133e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SUGAL AI">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712035.png">
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* 🚀 1. BOGGA OO LA JOOJIYAY SCROLL-KIISA GUUD */
         html, body {
             position: fixed;
             inset: 0;
@@ -51,7 +59,7 @@
             box-shadow: 0 0 15px rgba(20, 121, 255, .25);
         }
 
-        /* SCROLLBAR EE FARIIMAHA DHEXDA OO KALIYA */
+        /* SCROLLBAR */
         #scrollContainer {
             flex: 1 1 0%;
             min-height: 0;
@@ -66,7 +74,6 @@
         #scrollContainer::-webkit-scrollbar { width: 4px; }
         #scrollContainer::-webkit-scrollbar-thumb { background: rgba(0, 217, 255, 0.25); border-radius: 10px; }
 
-        /* FARTA WEELASHA */
         .message-text {
             font-size: 15.5px;
             line-height: 1.65;
@@ -122,9 +129,7 @@
     <!-- DARK OVERLAY -->
     <div id="overlay" onclick="toggleSidebar(); closeToolsMenu();" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 hidden"></div>
 
-    <!-- ========================================================= -->
-    <!-- ☰ SIDEBAR (OO AY KU JIRAAN DHAMMAAN QODOBADII AAD CODSATAY) -->
-    <!-- ========================================================= -->
+    <!-- SIDEBAR -->
     <aside id="sidebar">
         <!-- HEADER LOGO -->
         <div class="flex items-center justify-between mb-4">
@@ -136,6 +141,13 @@
                 </div>
             </div>
             <button onclick="toggleSidebar()" class="w-7 h-7 rounded-lg bg-blue-900/40 border border-cyan-400/30 text-cyan-400 flex items-center justify-center text-xs font-bold">✕</button>
+        </div>
+
+        <!-- 📲 PWA INSTALL BUTTON (SIDEBAR) -->
+        <div class="mb-2">
+            <button onclick="installPWA()" id="pwaInstallBtn" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-purple-600 hover:opacity-90 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition">
+                <span>📲</span> Install SUGAL AI App
+            </button>
         </div>
 
         <!-- MENU ITEMS -->
@@ -158,28 +170,21 @@
             
             <div class="my-1 border-t border-blue-900/40"></div>
 
-            <!-- ✦ EXPLORE AI TOOLS -->
             <button class="menu-btn" onclick="showTools(); toggleSidebar();">
                 <span>✦</span> Explore AI Tools
             </button>
-
-            <!-- 👤 PROFILE -->
             <button class="menu-btn" onclick="showProfile(); toggleSidebar();">
                 <span>👤</span> Profile
             </button>
-
-            <!-- ❓ HELP & SUPPORT -->
             <button class="menu-btn" onclick="showHelp(); toggleSidebar();">
                 <span>❓</span> Help & Support
             </button>
-
-            <!-- ⚙️ SETTINGS -->
             <button class="menu-btn" onclick="showSettings(); toggleSidebar();">
                 <span>⚙️</span> Settings
             </button>
         </div>
 
-        <!-- FOOTER USER STATUS -->
+        <!-- USER FOOTER -->
         <div class="pt-3 border-t border-blue-900/50 mt-auto">
             <div class="flex items-center gap-2 p-2 rounded-xl bg-blue-950/40 border border-blue-500/10 mb-1.5">
                 <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-xs" id="sidebarAvatar">H</div>
@@ -192,9 +197,7 @@
         </div>
     </aside>
 
-    <!-- ========================================================= -->
-    <!-- APP MAIN WRAPPER (NO BODY SCROLL) -->
-    <!-- ========================================================= -->
+    <!-- APP MAIN WRAPPER -->
     <div class="app-layout">
 
         <!-- 1. TOP HEADER -->
@@ -246,8 +249,6 @@
 
         <!-- 3. BOTTOM INPUT FORM -->
         <div class="bottom-input-bar relative">
-
-            <!-- 📌 TOOLS MENU POPUP -->
             <div id="toolsMenuPopup" class="tools-popup hidden absolute bottom-14 left-3 sm:left-8 bg-[#06183d] border border-cyan-400/50 rounded-2xl p-2 shadow-2xl z-50 flex flex-col gap-1 min-w-[170px] backdrop-blur-xl">
                 <button type="button" onclick="document.getElementById('fileInput').click(); closeToolsMenu();" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
                     <span class="text-sm text-cyan-400">📎</span> Attach File & Image
@@ -282,11 +283,8 @@
     <input type="file" id="fileInput" class="hidden" accept="image/*,.pdf,.txt,.docx,.doc,.csv" onchange="handleFiles(this.files)">
     <input type="file" id="pdfInput" class="hidden" accept=".pdf" onchange="handleFiles(this.files)">
 
-    <!-- ========================================================= -->
-    <!-- MODALS (EXPLORE TOOLS, PROFILE, HELP, SETTINGS, HISTORY) -->
-    <!-- ========================================================= -->
-
-    <!-- 1. EXPLORE AI TOOLS MODAL -->
+    <!-- MODALS -->
+    <!-- 1. EXPLORE AI TOOLS -->
     <div id="toolsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#06183d] border border-cyan-500/40 rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-cyan-500/20">
@@ -350,7 +348,7 @@
         </div>
     </div>
 
-    <!-- 3. HELP & SUPPORT MODAL -->
+    <!-- 3. HELP MODAL -->
     <div id="helpModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#06183d] border border-cyan-500/40 rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-cyan-500/20">
@@ -415,6 +413,40 @@
         </div>
     </div>
 
+    <!-- JAVASCRIPT -->
     <script src="dashboard.js"></script>
+
+    <!-- 🚀 2. SERVICE WORKER REGISTRATION & 1-CLICK PWA INSTALL SCRIPT -->
+    <script>
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User installed SUGAL AI App');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert("Si aad app-ka ugu degsato mobile-kaaga:\n1. Chrome-ka guji 3-da dhibcood ee sare midig.\n2. Dooro 'Add to Home screen' ama 'Install App'!");
+            }
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SUGAL AI Service Worker Active!'))
+                    .catch(err => console.log('SW Registration error:', err));
+            });
+        }
+    </script>
 </body>
 </html>
