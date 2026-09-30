@@ -41,7 +41,7 @@ function renderTopAuthNav() {
         if (sidebarUserName) sidebarUserName.textContent = userName;
     } else {
         topAuthArea.innerHTML = `
-            <a href="login.html" class="px-2.5 py-1 border border-cyan-400/40 text-cyan-300 rounded-xl text-xs font-semibold">Login</a>
+            <a href="login.html" class="px-2.5 py-1 border border-cyan-400/40 text-cyan-300 rounded-xl text-xs font-bold">Login</a>
             <a href="register.html" class="px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-xs font-bold">Sign Up</a>
         `;
         if (welcomeName) welcomeName.textContent = "Friend";
@@ -119,7 +119,7 @@ async function sendMessage(e) {
     let userPrompt = input ? input.value.trim() : '';
 
     if (!userPrompt && attachedFile) {
-        userPrompt = attachedFile.isImage ? "Fadlan iiga faalloo sawirkan oo ii sharrax." : "Fadlan iigu soo koob dukumentigan qodobada ugu muhiimsan.";
+        userPrompt = attachedFile.isImage ? "Fadlan iiga faalloo sawirkan oo ii sharrax waxa ku jira." : "Fadlan iigu soo koob dukumentigan qodobada ugu muhiimsan.";
     }
     if (!userPrompt && !attachedFile) return;
 
@@ -138,12 +138,12 @@ async function sendMessage(e) {
     if (input) input.value = '';
     removeAttachedFile();
 
-    // 🎨 CHECK IF USER ASKS FOR AN IMAGE
+    // 🎨 CHECK IF USER ASKS FOR AN AI IMAGE
     const lowerPrompt = userPrompt.toLowerCase();
-    if (lowerPrompt.startsWith("sawir:") || lowerPrompt.startsWith("image:") || lowerPrompt.startsWith("/image")) {
-        const imageSubject = userPrompt.replace(/^(sawir:|image:|\/image)/i, "").trim();
+    if (lowerPrompt.startsWith("sawir:") || lowerPrompt.startsWith("image:") || lowerPrompt.startsWith("/image") || lowerPrompt.startsWith("sawir ")) {
+        const imageSubject = userPrompt.replace(/^(sawir:|image:|\/image|sawir)/i, "").trim();
         if (imageSubject) {
-            handleImageGeneration(imageSubject);
+            await handleImageGeneration(imageSubject);
             return;
         }
     }
@@ -166,7 +166,7 @@ async function sendMessage(e) {
         if (response.ok) {
             const data = await response.json();
             currentChatId = data.chat_id;
-            // 🚀 MUUJI JAWAABTA NADIIFKA AH (Bilaa badhamo dhibaya)
+            // 🚀 MUUJI JAWAABTA NADIIFKA AH (Bilaa badhamo)
             appendMessage('ai', data.reply || data.response || 'Haye!');
         } else {
             appendMessage('ai', 'Cillad ayaa dhacday, fadlan dib u tijaabi.');
@@ -177,56 +177,98 @@ async function sendMessage(e) {
     }
 }
 
-// 🎨 AI IMAGE GENERATOR
-function handleImageGeneration(promptText) {
-    const typingId = appendTyping("🎨 SUGAL AI wuxuu soo saarayaa sawirkaaga...");
-    
-    setTimeout(() => {
-        removeElement(typingId);
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=1024&height=1024&nologo=true&enhance=true`;
-        
-        const list = document.getElementById('messagesList');
-        if (!list) return;
+// 🎨 ROBUST BACKEND AI IMAGE GENERATOR (HANDLES SOMALI & ENGLISH PROMPTS)
+async function handleImageGeneration(promptText) {
+    const user = getUserData();
+    const typingId = appendTyping("🎨 SUGAL AI wuxuu samaynayaa sawirkaaga HD-ga ah...");
 
-        const div = document.createElement('div');
-        div.className = 'ai-msg mr-auto p-4 rounded-2xl max-w-[92%] sm:max-w-[80%] rounded-bl-xs space-y-3';
-        div.innerHTML = `
-            <p class="text-xs sm:text-sm text-cyan-300 font-bold">🎨 Waa sawirkii aad codsatay: <em>"${escapeHtml(promptText)}"</em></p>
-            <div class="overflow-hidden rounded-xl border border-cyan-400/40 shadow-xl">
-                <img src="${imageUrl}" alt="${escapeHtml(promptText)}" class="w-full h-auto object-cover rounded-xl shadow-lg" loading="lazy">
-            </div>
-            <div class="flex justify-end pt-1">
-                <a href="${imageUrl}" target="_blank" download="sugal_ai_image.jpg" class="text-xs font-bold text-cyan-300 hover:underline flex items-center gap-1 bg-blue-900/70 px-3 py-1.5 rounded-lg border border-cyan-500/40">
-                    ⬇️ Soo Daji Sawirka (HD)
-                </a>
-            </div>
-        `;
-        list.appendChild(div);
-        scrollToBottom();
-    }, 1200);
+    try {
+        const res = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prompt: promptText,
+                email: user ? user.email : 'guest@user.com'
+            })
+        });
+
+        removeElement(typingId);
+        const data = await res.json();
+
+        if (res.ok && data.status === 'success') {
+            const list = document.getElementById('messagesList');
+            if (!list) return;
+
+            const div = document.createElement('div');
+            div.className = 'ai-msg mr-auto p-4 sm:p-5 rounded-2xl max-w-[92%] sm:max-w-[80%] rounded-bl-xs space-y-3';
+            div.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <p class="text-xs sm:text-sm text-cyan-300 font-bold">🎨 Sawirkii aad codsatay: <em>"${escapeHtml(promptText)}"</em></p>
+                    <button onclick="speakText('${escapeHtml(promptText)}')" class="text-xs text-cyan-300 hover:text-white" title="Dhagayso">🔊</button>
+                </div>
+                <div class="overflow-hidden rounded-xl border border-cyan-400/40 shadow-xl bg-slate-950">
+                    <img src="${data.image_url}" alt="${escapeHtml(promptText)}" class="w-full h-auto object-cover rounded-xl shadow-lg transition duration-300 hover:scale-[1.02]" loading="lazy">
+                </div>
+                <div class="flex justify-end pt-1">
+                    <a href="${data.image_url}" target="_blank" download="sugal_ai_image.jpg" class="text-xs font-bold text-cyan-300 hover:underline flex items-center gap-1.5 bg-blue-900/80 px-3.5 py-1.5 rounded-lg border border-cyan-500/40">
+                        ⬇️ Soo Daji Sawirka (HD)
+                    </a>
+                </div>
+            `;
+            list.appendChild(div);
+            scrollToBottom();
+        } else {
+            appendMessage('ai', 'Waan ka xumahay, sawirka lama soo saari karin. Fadlan mar kale tijaabi.');
+        }
+    } catch (err) {
+        removeElement(typingId);
+        appendMessage('ai', 'Cillad ayaa dhacday marka sawirka la samaynayay.');
+    }
 }
 
-// 🔤 MARKDOWN PARSER (BOLD TEXT & CLEAN BULLETS)
+// 🔤 MARKDOWN FORMATTER
 function formatMarkdown(text) {
     if (!text) return "";
     let formatted = escapeHtml(text);
-    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-cyan-200">$1</strong>');
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-cyan-200">$1</strong>');
     formatted = formatted.replace(/^\s*\*\s+(.*)$/gm, '• $1');
     return formatted;
 }
 
-// 🚀 APPEND CLEAN MESSAGE (ONLY TEXT)
+// 🔊 TEXT TO SPEECH (DHAGAYSO CODKA)
+window.speakText = function(text) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/[*#•`]/g, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.0;
+    window.speechSynthesis.speak(utterance);
+};
+
+// 🚀 APPEND CLEAN MESSAGE (ONLY BOLD TEXT + 🔊 SPEAK BUTTON)
 function appendMessage(role, text) {
     const list = document.getElementById('messagesList');
     if (!list) return;
 
     const div = document.createElement('div');
-    div.className = `p-4 sm:p-5 rounded-2xl message-text max-w-[90%] sm:max-w-[82%] ${
+    div.className = `p-4 sm:p-5 rounded-2xl message-text max-w-[90%] sm:max-w-[82%] relative group ${
         role === 'user' ? 'user-msg ml-auto text-white rounded-br-xs' : 'ai-msg mr-auto text-slate-100 rounded-bl-xs'
     }`;
-    div.innerHTML = formatMarkdown(text);
-    list.appendChild(div);
 
+    if (role === 'ai') {
+        div.innerHTML = `
+            <div class="flex justify-between items-start gap-2">
+                <div class="flex-1">${formatMarkdown(text)}</div>
+                <button onclick="speakText('${escapeHtml(text.replace(/'/g, "\\'"))}')" class="text-xs text-cyan-400 hover:text-white opacity-70 hover:opacity-100 transition p-1" title="Dhagayso Codka">
+                    🔊
+                </button>
+            </div>
+        `;
+    } else {
+        div.innerHTML = formatMarkdown(text);
+    }
+
+    list.appendChild(div);
     scrollToBottom();
 }
 
@@ -237,7 +279,7 @@ function appendTyping(customText = "✦ SUGAL AI is thinking...") {
 
     const div = document.createElement('div');
     div.id = id;
-    div.className = 'ai-msg mr-auto p-4 rounded-2xl text-sm font-semibold text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
+    div.className = 'ai-msg mr-auto p-4 rounded-2xl text-sm font-bold text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
     div.innerHTML = `<span>${customText}</span>`;
     list.appendChild(div);
 

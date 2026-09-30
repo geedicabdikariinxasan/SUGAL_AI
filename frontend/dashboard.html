@@ -24,7 +24,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* SIDEBAR DRAWER */
+        /* SIDEBAR */
         #sidebar {
             position: fixed; left: 0; top: 0; width: 280px; height: 100%;
             background: linear-gradient(180deg, #03133e 0%, #020a25 100%);
@@ -41,7 +41,7 @@
             width: 100%; border: none; outline: none; background: transparent;
             color: #b8c9e8; padding: 12px 14px; border-radius: 12px;
             display: flex; align-items: center; gap: 12px; cursor: pointer;
-            text-align: left; transition: .2s; font-size: 14px;
+            text-align: left; transition: .2s; font-size: 14px; font-weight: 600;
         }
         .menu-btn:hover { background: rgba(20, 120, 255, .15); color: white; }
         .menu-btn.active {
@@ -53,11 +53,11 @@
         #scrollContainer::-webkit-scrollbar { width: 5px; }
         #scrollContainer::-webkit-scrollbar-thumb { background: rgba(0, 217, 255, 0.25); border-radius: 10px; }
 
-        /* 🔤 1 & 3: FARTA OO LA WAYNEEYAY LANA BOLD-GAREEYAY (16.5px - 17.5px Bold) */
+        /* 🔤 FARTA OO AAD U WEYN OO BOLD AH (17px Bold) */
         .message-text {
             font-size: 16.5px;
             line-height: 1.7;
-            font-weight: 550; /* Bold & Clear */
+            font-weight: 550;
             letter-spacing: 0.01em;
             word-break: break-word;
             white-space: pre-wrap;
@@ -76,7 +76,6 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
         }
 
-        /* APP LAYOUT */
         .app-layout {
             display: flex;
             flex-direction: column;
@@ -87,7 +86,6 @@
             position: relative;
         }
 
-        /* MIDDLE CHAT CONTAINER */
         #scrollContainer {
             flex: 1 1 0%;
             min-height: 0;
@@ -98,7 +96,6 @@
             scroll-behavior: smooth;
         }
 
-        /* BOTTOM INPUT BAR */
         .bottom-input-bar {
             flex-shrink: 0;
             padding: 8px 14px 12px 14px;
@@ -132,7 +129,7 @@
                     <p class="text-[10px] text-blue-200 mt-1">Your Smart Assistant</p>
                 </div>
             </div>
-            <button onclick="toggleSidebar()" class="w-8 h-8 rounded-lg bg-blue-900/40 border border-cyan-400/30 text-cyan-400 flex items-center justify-center">✕</button>
+            <button onclick="toggleSidebar()" class="w-8 h-8 rounded-lg bg-blue-900/40 border border-cyan-400/30 text-cyan-400 flex items-center justify-center font-bold">✕</button>
         </div>
 
         <div class="flex flex-col gap-1.5 flex-1 overflow-y-auto">
@@ -140,7 +137,7 @@
             <button class="menu-btn" onclick="newChat(); toggleSidebar();"><span>💬</span> New Chat</button>
             <button class="menu-btn" onclick="showHistory(); toggleSidebar();"><span>◷</span> Chat History</button>
             <button class="menu-btn" onclick="document.getElementById('fileInput').click(); toggleSidebar();"><span>📎</span> Upload Files & Images</button>
-            <button class="menu-btn" onclick="openImagePrompt(); toggleSidebar();"><span>🎨</span> Generate Image</button>
+            <button class="menu-btn" onclick="openImagePrompt(); toggleSidebar();"><span>🎨</span> Generate AI Image</button>
         </div>
 
         <div class="pt-4 border-t border-blue-900/50 mt-auto">
@@ -148,10 +145,10 @@
                 <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-sm" id="sidebarAvatar">H</div>
                 <div class="min-w-0">
                     <p class="text-xs font-bold truncate text-slate-200" id="sidebarUserName">Hassan Abdikariin</p>
-                    <p class="text-[9px] text-emerald-400">● Online</p>
+                    <p class="text-[9px] text-emerald-400 font-semibold">● Online</p>
                 </div>
             </div>
-            <button onclick="logout()" class="w-full text-left py-2 px-3 text-xs text-red-300 hover:bg-red-500/10 rounded-lg">↪ &nbsp; Logout</button>
+            <button onclick="logout()" class="w-full text-left py-2 px-3 text-xs text-red-300 hover:bg-red-500/10 rounded-lg font-semibold">↪ &nbsp; Logout</button>
         </div>
     </aside>
 
@@ -164,7 +161,7 @@
             
             <div class="flex-1 max-w-xl h-9 bg-[#061945] border border-cyan-500/30 rounded-full px-3.5 flex items-center gap-2">
                 <span class="text-cyan-400 text-xs">⌕</span>
-                <input id="topSearch" type="text" placeholder="Ask anything... or type 'sawir: ...'" class="w-full bg-transparent text-xs sm:text-sm text-white outline-none" onkeydown="handleTopSearch(event)">
+                <input id="topSearch" type="text" placeholder="Ask anything... or type 'sawir: ...'" class="w-full bg-transparent text-xs sm:text-sm text-white outline-none font-medium" onkeydown="handleTopSearch(event)">
             </div>
 
             <div id="topAuthArea" class="ml-auto flex items-center gap-2"></div>
@@ -177,7 +174,7 @@
 
             <!-- WELCOME SCREEN -->
             <div id="welcomeBox" class="flex flex-col items-center justify-center text-center py-6 max-w-2xl mx-auto w-full my-auto">
-                <span class="px-3.5 py-1 rounded-full text-xs font-bold text-cyan-300 bg-cyan-400/10 border border-cyan-400/30">SUGAL AI</span>
+                <span class="px-3.5 py-1 rounded-full text-xs font-extrabold text-cyan-300 bg-cyan-400/10 border border-cyan-400/30">SUGAL AI</span>
                 <h1 class="text-3xl sm:text-4xl font-black mt-2.5">Hello, <span id="welcomeName" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400">Hassan Abdikariin</span> 👋</h1>
                 <p class="text-sm sm:text-base text-slate-300 mt-1.5 max-w-lg font-medium">Your AI assistant is ready! Ask questions, analyze documents & images, and create AI images.</p>
 
@@ -186,9 +183,9 @@
 
                 <!-- QUICK ACTIONS -->
                 <div class="flex flex-wrap justify-center gap-2 mt-1">
-                    <button onclick="quickMessage('Magaalooyinka ugu waaweyn Soomaaliya ma ii sheegi kartaa?')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40 font-medium">💡 Su'aalo Weydii</button>
-                    <button onclick="quickMessage('sawir: a cool futuristic Somali superhero in neon armor')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-900/40 text-cyan-200 hover:bg-cyan-800/50 font-medium">🎨 Samee Sawir AI</button>
-                    <button onclick="quickMessage('Koodh Python ah oo calculator ah ii samee')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40 font-medium">💻 Koodh Samee</button>
+                    <button onclick="quickMessage('Magaalooyinka ugu waaweyn Soomaaliya ma ii sheegi kartaa?')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40 font-semibold">💡 Su'aalo Weydii</button>
+                    <button onclick="quickMessage('sawir: a majestic futuristic Somali warrior in glowing cyber armor 8k')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-900/40 text-cyan-200 hover:bg-cyan-800/50 font-semibold">🎨 Samee Sawir AI</button>
+                    <button onclick="quickMessage('Koodh Python ah oo calculator ah ii samee')" class="text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40 font-semibold">💻 Koodh Samee</button>
                 </div>
             </div>
 
@@ -210,13 +207,13 @@
 
             <!-- 📌 POPUP MENU EE 3-DA ASTAAMOOD -->
             <div id="toolsMenuPopup" class="tools-popup hidden absolute bottom-16 left-4 sm:left-10 bg-[#06183d] border border-cyan-400/50 rounded-2xl p-2 shadow-2xl z-50 flex flex-col gap-1.5 min-w-[180px] backdrop-blur-xl">
-                <button type="button" onclick="document.getElementById('fileInput').click(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
+                <button type="button" onclick="document.getElementById('fileInput').click(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
                     <span class="text-base text-cyan-400">📎</span> Attach File & Image
                 </button>
-                <button type="button" onclick="document.getElementById('pdfInput').click(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
+                <button type="button" onclick="document.getElementById('pdfInput').click(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
                     <span class="text-base text-cyan-400">📄</span> Upload PDF Doc
                 </button>
-                <button type="button" onclick="openImagePrompt(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
+                <button type="button" onclick="openImagePrompt(); closeToolsMenu();" class="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-blue-900/60 rounded-xl transition">
                     <span class="text-base text-purple-400">🎨</span> Generate AI Image
                 </button>
             </div>
@@ -224,12 +221,12 @@
             <form id="chatForm" onsubmit="sendMessage(event)" class="max-w-4xl mx-auto flex items-center gap-2 bg-[#06183d] border border-cyan-400/70 rounded-full px-3 sm:px-4 py-2 shadow-[0_0_20px_rgba(0,217,255,0.15)] focus-within:border-cyan-300">
                 
                 <!-- ➕ BATOONKA 3-DA ASTAAMOOD -->
-                <button type="button" onclick="toggleToolsMenu()" title="Attach & AI Tools" class="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-sm hover:bg-cyan-400/20 active:scale-95 transition">
+                <button type="button" onclick="toggleToolsMenu()" title="Attach & AI Tools" class="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-sm hover:bg-cyan-400/20 active:scale-95 transition font-bold">
                     ➕
                 </button>
 
                 <!-- INPUT FIELD -->
-                <input id="messageInput" type="text" placeholder="Type your message or 'sawir: ...'" autocomplete="off" class="flex-1 bg-transparent text-white text-sm sm:text-base outline-none px-1 py-1 font-medium">
+                <input id="messageInput" type="text" placeholder="Type a message or 'sawir: ...'" autocomplete="off" class="flex-1 bg-transparent text-white text-sm sm:text-base outline-none px-1 py-1 font-semibold">
 
                 <!-- 🎙️ VOICE INPUT -->
                 <button type="button" onclick="startVoice()" title="Voice Input" class="p-1.5 text-cyan-400 hover:text-white hover:bg-blue-900/40 rounded-full transition text-base">
@@ -237,9 +234,9 @@
                 </button>
 
                 <!-- SEND BUTTON -->
-                <button type="submit" id="sendBtn" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white shrink-0 active:scale-95 shadow-md text-sm sm:text-base">➤</button>
+                <button type="submit" id="sendBtn" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white shrink-0 active:scale-95 shadow-md text-sm sm:text-base font-bold">➤</button>
             </form>
-            <p class="text-center text-[10px] text-slate-500 mt-1.5">Powered by SUGAL AI • Smarter • Faster</p>
+            <p class="text-center text-[10px] text-slate-500 mt-1.5 font-medium">Powered by SUGAL AI • Smarter • Faster</p>
         </div>
 
     </div>
@@ -253,7 +250,7 @@
         <div class="bg-[#06183d] border border-cyan-500/30 rounded-2xl max-w-sm w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
             <div class="p-4 border-b border-cyan-500/20 flex items-center justify-between">
                 <h3 class="font-bold text-xs text-cyan-300">Chat History</h3>
-                <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-white">✕</button>
+                <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <div class="p-4 overflow-y-auto flex-1 space-y-2" id="modalHistoryList"></div>
             <div class="p-3 border-t border-cyan-500/20 bg-[#020a25] flex justify-between items-center">
