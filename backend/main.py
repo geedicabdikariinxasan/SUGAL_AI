@@ -19,7 +19,7 @@ try:
 except ImportError:
     pypdf = None
 
-app = FastAPI(title="SUGAL AI - Professional Edition")
+app = FastAPI(title="SUGAL AI - World Class Edition")
 
 # MongoDB Atlas
 MONGO_DETAILS = "mongodb+srv://Haji:1122@cluster0.wcn5swm.mongodb.net/?appName=Cluster0"
@@ -90,11 +90,11 @@ class ProfileUpdateRequest(BaseModel):
     fullName: str
 
 system_prompt = """
-You are SUGAL AI, a world-class, highly intelligent, friendly, and respectful multilingual AI assistant.
+You are SUGAL AI, a world-class, highly capable, intelligent, and friendly AI assistant.
 Rules:
 1. Always reply in the EXACT SAME LANGUAGE the user writes in (Somali, Arabic, English, etc.).
 2. If Somali, reply in natural, rich, respectful, and crystal-clear Somali.
-3. Use clear formatting, bullet points, and code blocks where appropriate.
+3. If user asks for a document, essay, report, Word, or PDF, structure it thoroughly with clear titles and headings.
 """
 
 # ================= AUTH =================
@@ -152,21 +152,21 @@ async def update_user_profile(req: ProfileUpdateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ================= 🎨 AI IMAGE GENERATOR ENGINE =================
+# ================= 🎨 ULTRA-SMART AI IMAGE GENERATOR =================
 @app.post("/api/generate-image")
 async def generate_ai_image(req: ImageGenRequest):
     user_prompt = req.prompt.strip()
     if not user_prompt:
         raise HTTPException(status_code=400, detail="Fadlan qor sawirka aad rabto!")
 
-    # 1. U beddel prompt-ka Ingiriis faahfaahsan oo tayo sare leh adigoo isticmaalaya Groq LLM
+    # U beddel prompt-ka Ingiriis faahfaahsan adigoo isticmaalaya Groq LLM
     enhanced_prompt = user_prompt
     try:
         completion = await groq_client.chat.completions.create(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an expert AI prompt engineer. Translate the user's image request (which may be in Somali, Arabic, or English) into an ultra-detailed, photorealistic, cinematic English visual prompt (under 35 words). Avoid generic text. Return ONLY the prompt text, no quotes."
+                    "content": "You are an expert AI image prompt engineer. Convert the user prompt (Somali/Arabic/English) into an ultra-realistic, highly detailed cinematic 8k English prompt for Flux/Midjourney. Avoid generic text. Return ONLY the final prompt text, no quotes."
                 },
                 {
                     "role": "user",
@@ -174,15 +174,13 @@ async def generate_ai_image(req: ImageGenRequest):
                 }
             ],
             model="llama-3.1-8b-instant",
-            max_tokens=80,
+            max_tokens=90,
             temperature=0.7
         )
         enhanced_prompt = completion.choices[0].message.content.strip().strip('"')
     except Exception as e:
-        print(f"Prompt enhance warning: {e}")
         enhanced_prompt = user_prompt
 
-    # 2. Samee Link-ga sawirka HD-ga ah
     seed = random.randint(1000, 999999)
     safe_prompt = enhanced_prompt.replace("/", " ").replace("?", " ").strip()
     image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1024&height=1024&seed={seed}&nologo=true&enhance=true&model=flux"
@@ -346,19 +344,14 @@ async def extract_file_content(file: UploadFile = File(...)):
         filename_lower = file.filename.lower()
         extracted_text = ""
 
-        # Haddii uu yahay Sawir (Image)
         if any(filename_lower.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp', '.bmp']):
-            extracted_text = f"Sawir la magac baxay '{file.filename}' ayaa lagu lifaaqay. Fadlan falanqee oo faahfaahin ka bixi waxa la weydiiyo."
-
-        # Haddii uu yahay PDF
+            extracted_text = f"[Image File Uploaded: {file.filename}] - User wants analysis or edit of this image."
         elif filename_lower.endswith(".pdf"):
             if pypdf:
                 reader = pypdf.PdfReader(io.BytesIO(content_bytes))
                 extracted_text = "\n".join([p.extract_text() or "" for p in reader.pages]).strip()
             else:
                 extracted_text = "PDF reader library is loading."
-
-        # Haddii uu yahay Text/Doc
         else:
             try:
                 extracted_text = content_bytes.decode("utf-8", errors="ignore").strip()
