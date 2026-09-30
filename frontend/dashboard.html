@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SUGAL AI</title>
 
     <!-- Tailwind CSS -->
@@ -11,7 +11,11 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
+        /* 🚀 LOCK VIEWPORT SI UU INPUT-KU MAR WALBA U MUUQDO */
         html, body {
+            position: fixed;
+            inset: 0;
+            width: 100%;
             height: 100%;
             height: 100dvh;
             overflow: hidden;
@@ -46,8 +50,8 @@
         }
 
         /* SCROLLBAR */
-        #chatArea::-webkit-scrollbar { width: 5px; }
-        #chatArea::-webkit-scrollbar-thumb { background: rgba(0, 217, 255, 0.25); border-radius: 10px; }
+        #scrollContainer::-webkit-scrollbar { width: 5px; }
+        #scrollContainer::-webkit-scrollbar-thumb { background: rgba(0, 217, 255, 0.25); border-radius: 10px; }
 
         /* BUBBLE SHADOWS */
         .user-msg {
@@ -58,6 +62,37 @@
             background: rgba(7, 35, 82, .92);
             border: 1px solid rgba(0, 210, 255, .25);
             box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+        }
+
+        /* MAIN FLEX CONTAINER */
+        .app-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* MIDDLE CHAT SCROLL AREA */
+        #scrollContainer {
+            flex: 1 1 0%;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 16px;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        /* INPUT AREA LOCKED AT BOTTOM */
+        .bottom-input-bar {
+            flex-shrink: 0;
+            padding: 8px 14px 12px 14px;
+            background: #02091f;
+            border-top: 1px solid rgba(100, 180, 255, .15);
+            z-index: 30;
         }
     </style>
 </head>
@@ -101,12 +136,12 @@
     </aside>
 
     <!-- ========================================================= -->
-    <!-- MAIN APPLICATION CONTAINER (FULLSCREEN VERTICAL FLEX) -->
+    <!-- APP WRAPPER (TOP BAR, MIDDLE SCROLL, BOTTOM INPUT) -->
     <!-- ========================================================= -->
-    <div class="h-screen h-[100dvh] flex flex-col overflow-hidden w-full relative">
+    <div class="app-layout">
 
-        <!-- 1. TOP HEADER -->
-        <header class="h-14 min-h-[56px] bg-[#03133e]/90 border-b border-cyan-500/20 px-4 flex items-center gap-3 shrink-0 z-30 backdrop-blur-md">
+        <!-- 1. TOP HEADER (FIXED HEIGHT) -->
+        <header class="h-14 min-h-[56px] bg-[#03133e]/95 border-b border-cyan-500/20 px-4 flex items-center gap-3 shrink-0 z-30 backdrop-blur-md">
             <button id="menuToggleBtn" onclick="toggleSidebar()" class="w-9 h-9 rounded-lg border border-cyan-400/40 bg-cyan-400/10 text-cyan-300 flex items-center justify-center text-lg active:scale-95">☰</button>
             
             <div class="flex-1 max-w-lg h-9 bg-[#061945] border border-cyan-500/30 rounded-full px-3 flex items-center gap-2">
@@ -117,36 +152,34 @@
             <div id="topAuthArea" class="ml-auto flex items-center gap-2"></div>
         </header>
 
-        <!-- 2. SCROLLABLE CHAT & WELCOME BODY -->
-        <div id="chatArea" class="flex-1 overflow-y-auto p-4 relative flex flex-col">
-            
-            <!-- BACKGROUND GLOWS -->
+        <!-- 2. SCROLLABLE MIDDLE BODY -->
+        <div id="scrollContainer">
+            <!-- GLOW EFFECTS -->
             <div class="absolute w-72 h-72 rounded-full bg-blue-600/10 blur-3xl right-5 top-10 pointer-events-none"></div>
             <div class="absolute w-64 h-64 rounded-full bg-purple-600/10 blur-3xl left-5 bottom-10 pointer-events-none"></div>
 
-            <!-- WELCOME SCREEN (KALIYA BILOWGA AYAA LA ARKAYAA) -->
-            <div id="welcomeBox" class="my-auto flex flex-col items-center justify-center text-center py-4 max-w-xl mx-auto w-full">
+            <!-- WELCOME SCREEN (QARI MARKA SHEEKADU SOO GASHO) -->
+            <div id="welcomeBox" class="flex flex-col items-center justify-center text-center py-6 max-w-xl mx-auto w-full my-auto">
                 <span class="px-3 py-1 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-400/10 border border-cyan-400/30">SUGAL AI</span>
                 <h1 class="text-2xl sm:text-3xl font-black mt-2">Hello, <span id="welcomeName" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400">Hassan Abdikariin</span> 👋</h1>
                 <p class="text-xs text-slate-400 mt-1 max-w-md">Your AI assistant is ready! Ask questions, code, analyze documents, and more.</p>
 
                 <!-- ROBOT -->
-                <div class="w-28 h-24 my-4 rounded-[40%] bg-gradient-to-br from-white to-cyan-200 border-2 border-cyan-300 flex items-center justify-center text-5xl shadow-[0_0_30px_rgba(0,217,255,0.35)]">🤖</div>
+                <div class="w-24 h-20 sm:w-28 sm:h-24 my-3 rounded-[40%] bg-gradient-to-br from-white to-cyan-200 border-2 border-cyan-300 flex items-center justify-center text-4xl sm:text-5xl shadow-[0_0_30px_rgba(0,217,255,0.35)]">🤖</div>
 
-                <!-- QUICK BUTTONS -->
-                <div class="flex flex-wrap justify-center gap-2 mt-2">
+                <!-- QUICK ACTION BUTTONS -->
+                <div class="flex flex-wrap justify-center gap-2 mt-1">
                     <button onclick="quickMessage('Magaalooyinka ugu waaweyn Soomaaliya ma ii sheegi kartaa?')" class="text-xs px-3 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40">💡 Su'aalo Weydii</button>
                     <button onclick="quickMessage('Isku qor maqaal kooban oo ku saabsan AI')" class="text-xs px-3 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40">✍️ Maqaal Qor</button>
                     <button onclick="quickMessage('Koodh Python ah oo calculator ah ii samee')" class="text-xs px-3 py-1.5 rounded-full border border-blue-400/20 bg-blue-900/30 text-blue-200 hover:bg-blue-800/40">💻 Koodh Samee</button>
                 </div>
             </div>
 
-            <!-- MESSAGES CONTAINER (DHEXDA AYAA FARIIMAHA LOOGU SHUBUYAA) -->
-            <div id="messagesList" class="w-full max-w-2xl mx-auto space-y-3 pb-4"></div>
-
+            <!-- CHAT MESSAGES LIST -->
+            <div id="messagesList" class="w-full max-w-2xl mx-auto space-y-3 pb-3"></div>
         </div>
 
-        <!-- ATTACHED FILE PREVIEW BADGE -->
+        <!-- ATTACHED FILE BADGE -->
         <div id="filePreviewBadge" class="hidden px-4 py-1 bg-[#02091f] shrink-0">
             <div class="flex items-center gap-2 bg-blue-900/80 border border-cyan-400/40 text-cyan-300 px-3 py-1 rounded-xl w-fit text-xs font-semibold mx-auto">
                 <span>📄</span>
@@ -155,14 +188,14 @@
             </div>
         </div>
 
-        <!-- 3. BOTTOM INPUT FORM (LOCKED SOLID AT BOTTOM) -->
-        <div class="p-3 bg-[#02091f] border-t border-cyan-500/20 shrink-0 z-20">
-            <form id="chatForm" onsubmit="sendMessage(event)" class="max-w-2xl mx-auto flex items-center gap-2 bg-[#06183d] border border-cyan-400/80 rounded-full px-4 py-1.5 shadow-[0_0_20px_rgba(0,217,255,0.15)] focus-within:border-cyan-300">
-                <span class="text-cyan-400 text-base">✦</span>
+        <!-- 3. BOTTOM INPUT FORM (MAR WALBA HOOSTA KU DHEX JIRA) -->
+        <div class="bottom-input-bar">
+            <form id="chatForm" onsubmit="sendMessage(event)" class="max-w-2xl mx-auto flex items-center gap-2 bg-[#06183d] border border-cyan-400/80 rounded-full px-3.5 py-1.5 shadow-[0_0_20px_rgba(0,217,255,0.15)] focus-within:border-cyan-300">
+                <span class="text-cyan-400 text-base pl-1">✦</span>
                 <input id="messageInput" type="text" placeholder="Type your question here..." autocomplete="off" class="flex-1 bg-transparent text-white text-xs sm:text-sm outline-none py-1.5">
                 <button type="submit" id="sendBtn" class="w-9 h-9 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white shrink-0 active:scale-95 shadow-md">➤</button>
             </form>
-            <p class="text-center text-[10px] text-slate-500 mt-1">Powered by SUGAL AI • Smarter • Faster</p>
+            <p class="text-center text-[9px] text-slate-500 mt-1">Powered by SUGAL AI • Smarter • Faster</p>
         </div>
 
     </div>
