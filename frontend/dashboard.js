@@ -58,6 +58,17 @@ function toggleSidebar() {
     }
 }
 
+// ⚙️ TOGGLE TOOLS MENU POPUP
+function toggleToolsMenu() {
+    const menu = document.getElementById('toolsMenuPopup');
+    if (menu) menu.classList.toggle('hidden');
+}
+
+function closeToolsMenu() {
+    const menu = document.getElementById('toolsMenuPopup');
+    if (menu) menu.classList.add('hidden');
+}
+
 function goHome() {
     currentChatId = null;
     removeAttachedFile();
@@ -99,9 +110,10 @@ function openImagePrompt() {
     }
 }
 
-// ================= 🚀 SEND MESSAGE + AI IMAGE GENERATOR =================
+// ================= SEND MESSAGE & AI IMAGE GENERATOR =================
 async function sendMessage(e) {
     if (e) e.preventDefault();
+    closeToolsMenu();
 
     const user = getUserData();
     const input = document.getElementById('messageInput');
@@ -112,7 +124,7 @@ async function sendMessage(e) {
     }
     if (!userPrompt && !attachedFile) return;
 
-    // Qari Hello Hassan
+    // Qari Welcome Box
     const welcome = document.getElementById('welcomeBox');
     if (welcome) welcome.style.display = 'none';
 
@@ -128,7 +140,7 @@ async function sendMessage(e) {
     if (input) input.value = '';
     removeAttachedFile();
 
-    // 🎨 CHECK IF USER WANTS AN AI IMAGE (e.g. 'sawir: ...' or '/image ...')
+    // 🎨 CHECK IF USER ASKS FOR AN IMAGE
     const lowerPrompt = userPrompt.toLowerCase();
     if (lowerPrompt.startsWith("sawir:") || lowerPrompt.startsWith("image:") || lowerPrompt.startsWith("/image")) {
         const imageSubject = userPrompt.replace(/^(sawir:|image:|\/image)/i, "").trim();
@@ -166,7 +178,7 @@ async function sendMessage(e) {
     }
 }
 
-// 🎨 AI IMAGE GENERATOR HANDLER
+// 🎨 AI IMAGE GENERATOR
 function handleImageGeneration(promptText) {
     const typingId = appendTyping("🎨 SUGAL AI wuxuu soo saarayaa sawirkaaga...");
     
@@ -178,14 +190,14 @@ function handleImageGeneration(promptText) {
         if (!list) return;
 
         const div = document.createElement('div');
-        div.className = 'ai-msg mr-auto p-4 rounded-2xl max-w-[90%] sm:max-w-[75%] rounded-bl-xs space-y-3';
+        div.className = 'ai-msg mr-auto p-4 rounded-2xl max-w-[92%] sm:max-w-[80%] rounded-bl-xs space-y-3';
         div.innerHTML = `
-            <p class="text-xs text-cyan-300 font-semibold">🎨 Waa sawirkii aad codsatay: <em>"${escapeHtml(promptText)}"</em></p>
-            <div class="relative group overflow-hidden rounded-xl border border-cyan-400/40">
-                <img src="${imageUrl}" alt="${escapeHtml(promptText)}" class="w-full h-auto object-cover rounded-xl shadow-lg transition duration-300 hover:scale-[1.02]" loading="lazy">
+            <p class="text-xs sm:text-sm text-cyan-300 font-semibold">🎨 Waa sawirkii aad codsatay: <em>"${escapeHtml(promptText)}"</em></p>
+            <div class="overflow-hidden rounded-xl border border-cyan-400/40 shadow-xl">
+                <img src="${imageUrl}" alt="${escapeHtml(promptText)}" class="w-full h-auto object-cover rounded-xl shadow-lg" loading="lazy">
             </div>
-            <div class="flex justify-end">
-                <a href="${imageUrl}" target="_blank" download="sugal_ai_image.jpg" class="text-xs font-bold text-cyan-300 hover:underline flex items-center gap-1 bg-blue-900/60 px-3 py-1.5 rounded-lg border border-cyan-500/30">
+            <div class="flex justify-end pt-1">
+                <a href="${imageUrl}" target="_blank" download="sugal_ai_image.jpg" class="text-xs font-bold text-cyan-300 hover:underline flex items-center gap-1 bg-blue-900/70 px-3 py-1.5 rounded-lg border border-cyan-500/40">
                     ⬇️ Soo Daji Sawirka (HD)
                 </a>
             </div>
@@ -195,13 +207,58 @@ function handleImageGeneration(promptText) {
     }, 1200);
 }
 
-// 🔤 MESSAGE FORMATTER WITH BOLD / BULLET POINTS SUPPORT
+// 📄 EXPORT AS WORD DOCUMENT (.doc)
+window.downloadAsWord = function(buttonEl) {
+    const msgDiv = buttonEl.closest('.ai-msg').querySelector('.content-body');
+    if (!msgDiv) return;
+
+    const textContent = msgDiv.innerText;
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>SUGAL AI Document</title></head><body style='font-family: Arial, sans-serif; font-size: 13pt; line-height: 1.6; color: #111;'>";
+    const footer = "</body></html>";
+    const sourceHTML = header + textContent.replace(/\n/g, "<br>") + footer;
+    const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+    
+    const fileDownload = document.createElement("a");
+    document.body.appendChild(fileDownload);
+    fileDownload.href = source;
+    fileDownload.download = "SUGAL_AI_Document.doc";
+    fileDownload.click();
+    document.body.removeChild(fileDownload);
+};
+
+// 📄 EXPORT AS PDF
+window.downloadAsPDF = function(buttonEl) {
+    const msgDiv = buttonEl.closest('.ai-msg').querySelector('.content-body');
+    if (!msgDiv) return;
+
+    const printWindow = window.open('', '', 'height=700,width=800');
+    printWindow.document.write('<html><head><title>SUGAL AI Document</title>');
+    printWindow.document.write('<style>body{font-family: Arial, sans-serif; padding: 40px; font-size: 13pt; line-height: 1.6; color: #222;} h2{color:#0284c7;} strong{color:#0369a1;}</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<h2>SUGAL AI Generated Document</h2><hr style="margin-bottom:20px;">');
+    printWindow.document.write(msgDiv.innerHTML.replace(/\n/g, "<br>"));
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 400);
+};
+
+// 📋 COPY TEXT
+window.copyMessageText = function(buttonEl) {
+    const msgDiv = buttonEl.closest('.ai-msg').querySelector('.content-body');
+    if (!msgDiv) return;
+
+    navigator.clipboard.writeText(msgDiv.innerText);
+    const originalText = buttonEl.innerText;
+    buttonEl.innerText = "✓ Copied!";
+    setTimeout(() => { buttonEl.innerText = originalText; }, 2000);
+};
+
+// 🔤 MARKDOWN FORMATTER
 function formatMarkdown(text) {
     if (!text) return "";
     let formatted = escapeHtml(text);
-    // Bold: **text** -> <strong>text</strong>
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-cyan-200">$1</strong>');
-    // Bullet points: * text -> • text
     formatted = formatted.replace(/^\s*\*\s+(.*)$/gm, '• $1');
     return formatted;
 }
@@ -211,12 +268,32 @@ function appendMessage(role, text) {
     if (!list) return;
 
     const div = document.createElement('div');
-    div.className = `p-3.5 sm:p-4 rounded-2xl message-box max-w-[88%] sm:max-w-[80%] ${
+    div.className = `p-4 sm:p-5 rounded-2xl message-text max-w-[90%] sm:max-w-[82%] ${
         role === 'user' ? 'user-msg ml-auto text-white rounded-br-xs' : 'ai-msg mr-auto text-slate-100 rounded-bl-xs'
     }`;
-    div.innerHTML = formatMarkdown(text);
-    list.appendChild(div);
 
+    if (role === 'ai') {
+        div.innerHTML = `
+            <div class="content-body">${formatMarkdown(text)}</div>
+            
+            <!-- 📄 ACTION BAR: COPY, WORD, PDF -->
+            <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-cyan-500/20 text-xs">
+                <button onclick="copyMessageText(this)" class="px-2.5 py-1 rounded-lg bg-blue-900/50 hover:bg-blue-800/70 border border-cyan-500/30 text-cyan-300 transition">
+                    📋 Copy
+                </button>
+                <button onclick="downloadAsWord(this)" class="px-2.5 py-1 rounded-lg bg-blue-900/50 hover:bg-blue-800/70 border border-cyan-500/30 text-cyan-300 transition">
+                    📝 Word (.doc)
+                </button>
+                <button onclick="downloadAsPDF(this)" class="px-2.5 py-1 rounded-lg bg-blue-900/50 hover:bg-blue-800/70 border border-cyan-500/30 text-cyan-300 transition">
+                    📄 PDF
+                </button>
+            </div>
+        `;
+    } else {
+        div.innerHTML = formatMarkdown(text);
+    }
+
+    list.appendChild(div);
     scrollToBottom();
 }
 
@@ -227,7 +304,7 @@ function appendTyping(customText = "✦ SUGAL AI is thinking...") {
 
     const div = document.createElement('div');
     div.id = id;
-    div.className = 'ai-msg mr-auto p-3.5 rounded-2xl text-xs sm:text-sm text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
+    div.className = 'ai-msg mr-auto p-4 rounded-2xl text-sm text-cyan-300 max-w-[85%] rounded-bl-xs flex items-center gap-2';
     div.innerHTML = `<span>${customText}</span>`;
     list.appendChild(div);
 
@@ -311,7 +388,7 @@ function startVoice() {
     recognition.continuous = false;
 
     const input = document.getElementById('messageInput');
-    if (input) input.placeholder = "Dhagaysanayaa... 🎙️ (Hadal hadda)";
+    if (input) input.placeholder = "Dhagaysanayaa... 🎙️";
 
     recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
@@ -319,12 +396,6 @@ function startVoice() {
             input.value = transcript;
             sendMessage();
         }
-    };
-    recognition.onerror = () => {
-        if (input) input.placeholder = "Type your question here...";
-    };
-    recognition.onend = () => {
-        if (input) input.placeholder = "Type your question here...";
     };
     recognition.start();
 }
@@ -418,7 +489,6 @@ async function clearAllHistory() {
     } catch (e) {}
 }
 
-function showTools() { alert("AI Tools: Translator, Coding Assistant, & AI Image Generator."); }
 function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
 
 function logout() {
